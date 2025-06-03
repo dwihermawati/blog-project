@@ -17,6 +17,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
           className={cn(
             'text-sm-regular h-12 w-full rounded-xl border border-neutral-300 px-4 py-2 pr-12 outline-none placeholder:text-neutral-500',
             'focus:border-primary-300 focus:border-[1px]',
+            'aria-invalid:ring-destructive/20 aria-invalid:border-destructive',
             className
           )}
           {...props}

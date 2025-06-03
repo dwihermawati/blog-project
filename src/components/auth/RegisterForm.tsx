@@ -121,13 +121,14 @@ const RegisterForm: React.FC = () => {
             <FormField
               control={form.control}
               name='name'
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <Input
                     disabled={isLoadingCombined}
                     placeholder='Enter your name'
                     {...field}
+                    aria-invalid={!!fieldState.error}
                   />
                   <FormMessage />
                 </FormItem>
@@ -136,13 +137,14 @@ const RegisterForm: React.FC = () => {
             <FormField
               control={form.control}
               name='email'
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <Input
                     disabled={isLoadingCombined}
                     placeholder='Enter your email'
                     {...field}
+                    aria-invalid={!!fieldState.error}
                   />
                   <FormMessage />
                 </FormItem>
@@ -151,13 +153,14 @@ const RegisterForm: React.FC = () => {
             <FormField
               control={form.control}
               name='password'
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <PasswordInput
                     disabled={isLoadingCombined}
                     placeholder='Enter your password'
                     {...field}
+                    aria-invalid={!!fieldState.error}
                   />
                   <FormMessage />
                 </FormItem>
@@ -166,13 +169,14 @@ const RegisterForm: React.FC = () => {
             <FormField
               control={form.control}
               name='confirmPassword'
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <PasswordInput
                     disabled={isLoadingCombined}
                     placeholder='Enter your confirm password'
                     {...field}
+                    aria-invalid={!!fieldState.error}
                   />
                   <FormMessage />
                 </FormItem>

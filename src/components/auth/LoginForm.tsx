@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, useAnimation } from 'motion/react';
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { BeatLoader } from 'react-spinners';
 import { z } from 'zod';
@@ -16,6 +16,7 @@ import { Input } from '../ui/input';
 import PasswordInput from '../ui/input-password';
 import { Button } from '../ui/button';
 import { Link, useNavigate } from 'react-router-dom';
+import useLogin from '@/hooks/useLogin';
 
 const loginSchema = z.object({
   email: z
@@ -29,7 +30,6 @@ const loginSchema = z.object({
 const LoginForm: React.FC = () => {
   const controls = useAnimation();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
   const shakeAnimation = {
     x: [0, -10, 10, -10, 10, 0],
@@ -44,26 +44,49 @@ const LoginForm: React.FC = () => {
     },
   });
 
-  async function onSubmit(data: z.infer<typeof loginSchema>) {
-    try {
-      setLoading(true);
+  const { mutate: loginUser, isPending: isLoadingLogin } = useLogin({
+    onSuccess: (data, variables) => {
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('userEmail', variables.email);
 
-      console.log('Form data valid, simulating successful login:', data);
-
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      alert('Login successful! Welcome back.');
 
       form.reset();
-      navigate('/');
-    } catch (error: any) {
-      if (import.meta.env.NODE_ENV !== 'production') {
-        console.error('Error during login simulation:', error);
-      }
+      navigate('/', { state: { message: 'Login successful! Welcome back.' } });
+    },
+
+    onError: (err) => {
+      console.error('Login failed:', err);
       controls.start(shakeAnimation);
-      alert('Login simulation failed. Please try again.');
-    } finally {
-      setLoading(false);
+
+      form.setError('email', {
+        type: 'server',
+        message: 'Error Text Helper',
+      });
+
+      form.setError('password', {
+        type: 'server',
+        message: 'Error Text Helper',
+      });
+    },
+  });
+
+  async function onSubmit(data: z.infer<typeof loginSchema>) {
+    try {
+      const payload = {
+        email: data.email,
+        password: data.password,
+      };
+
+      loginUser(payload);
+    } catch (error) {
+      if (import.meta.env.NODE_ENV !== 'production') {
+        console.error('Form submission failed (catch block):', error);
+      }
     }
   }
+
+  const isLoadingCombined = form.formState.isSubmitting || isLoadingLogin;
 
   return (
     <div className='flex-center min-h-screen px-6 py-31.75'>
@@ -83,13 +106,14 @@ const LoginForm: React.FC = () => {
             <FormField
               control={form.control}
               name='email'
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <Input
-                    disabled={loading}
+                    disabled={isLoadingCombined}
                     placeholder='Enter your email'
                     {...field}
+                    aria-invalid={!!fieldState.error}
                   />
                   <FormMessage />
                 </FormItem>
@@ -98,21 +122,26 @@ const LoginForm: React.FC = () => {
             <FormField
               control={form.control}
               name='password'
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <PasswordInput
-                    disabled={loading}
+                    disabled={isLoadingCombined}
                     placeholder='Enter your password'
                     {...field}
+                    aria-invalid={!!fieldState.error}
                   />
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <Button disabled={loading} className='mt-5 w-full'>
-              {loading ? <BeatLoader size={20} color='#fff' /> : 'Login'}
+            <Button disabled={isLoadingCombined} className='mt-5 w-full'>
+              {isLoadingCombined ? (
+                <BeatLoader size={20} color='#fff' />
+              ) : (
+                'Login'
+              )}
             </Button>
           </motion.form>
         </Form>

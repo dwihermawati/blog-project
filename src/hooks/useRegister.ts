@@ -1,14 +1,22 @@
 import { useMutation } from '@tanstack/react-query';
 import authService from '@/services/authService';
-import { RegisterPayload } from '@/types/auth';
+import {
+  ApiErrorResponse,
+  RegisterPayload,
+  RegisterSuccessResponse,
+} from '@/types/auth';
 
 interface RegisterOptions {
-  onSuccess?: (data: any) => void;
-  onError?: (error: any) => void;
+  onSuccess?: (data: RegisterSuccessResponse) => void;
+  onError?: (error: ApiErrorResponse) => void;
 }
 
 const useRegister = (options?: RegisterOptions) => {
-  return useMutation<any, Error, RegisterPayload>({
+  return useMutation<
+    RegisterSuccessResponse,
+    ApiErrorResponse,
+    RegisterPayload
+  >({
     mutationFn: authService.register,
     onSuccess: (data) => {
       options?.onSuccess?.(data);

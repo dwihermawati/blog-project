@@ -3,6 +3,8 @@ import {
   RegisterPayload,
   RegisterSuccessResponse,
   ApiErrorResponse,
+  LoginPayload,
+  LoginSuccessResponse,
 } from '@/types/auth';
 import axios from 'axios';
 
@@ -25,6 +27,24 @@ const authService = {
       } else {
         throw new Error(
           error.message || 'Registration failed: Failed to connect to server'
+        );
+      }
+    }
+  },
+
+  login: async (payload: LoginPayload): Promise<LoginSuccessResponse> => {
+    try {
+      const response = await apiClient.post<LoginSuccessResponse>(
+        '/auth/login',
+        payload
+      );
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new Error('Login failed: Incorrect email or password');
+      } else {
+        throw new Error(
+          error.message || 'Login failed: Failed to connect to server'
         );
       }
     }
