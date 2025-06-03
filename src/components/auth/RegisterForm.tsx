@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, useAnimation } from 'motion/react';
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { BeatLoader } from 'react-spinners';
 import { z } from 'zod';
@@ -16,6 +16,8 @@ import { Input } from '../ui/input';
 import PasswordInput from '../ui/input-password';
 import { Button } from '../ui/button';
 import { Link, useNavigate } from 'react-router-dom';
+import useRegister from '@/hooks/useRegister';
+import { RegisterPayload } from '@/types/auth';
 
 const registerSchema = z
   .object({
@@ -39,7 +41,6 @@ const registerSchema = z
   });
 
 const RegisterForm: React.FC = () => {
-  const [loading, setLoading] = useState(false);
   const controls = useAnimation();
   const navigate = useNavigate();
 
@@ -58,25 +59,49 @@ const RegisterForm: React.FC = () => {
     },
   });
 
+  const {
+    mutate: registerUser,
+    isPending: isLoadingMutation,
+    isError: isErrorMutation,
+    error: mutationError,
+  } = useRegister({
+    onSuccess: (data) => {
+      const successMessage =
+        data.message || 'Registration successful! Please login.';
+      form.reset();
+      alert(successMessage);
+      navigate('/login', {
+        state: {
+          message: successMessage,
+        },
+      });
+    },
+    onError: (err) => {
+      console.error('Error in register mutation:', err);
+      const errorMessage =
+        err.message || 'Registration failed. Please try again.';
+      alert(errorMessage);
+      controls.start(shakeAnimation);
+    },
+  });
+
   async function onSubmit(data: z.infer<typeof registerSchema>) {
     try {
-      setLoading(true);
-      console.log('Form data valid, simulating successful registration:', data);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const payload: RegisterPayload = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      };
 
-      form.reset();
-      navigate('/login', {
-        state: { message: 'Registration successful! Please log in.' },
-      });
-    } catch (error: any) {
+      registerUser(payload);
+    } catch (error) {
       if (import.meta.env.NODE_ENV !== 'production') {
-        console.error('Error during registration simulation:', error);
+        console.error('Form submission failed (catch block):', error);
       }
-      controls.start(shakeAnimation);
-    } finally {
-      setLoading(false);
     }
   }
+
+  const isLoadingCombined = form.formState.isSubmitting || isLoadingMutation;
 
   return (
     <div className='flex-center min-h-screen px-6 py-31.75'>
@@ -100,7 +125,7 @@ const RegisterForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <Input
-                    disabled={loading}
+                    disabled={isLoadingCombined}
                     placeholder='Enter your name'
                     {...field}
                   />
@@ -115,7 +140,7 @@ const RegisterForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <Input
-                    disabled={loading}
+                    disabled={isLoadingCombined}
                     placeholder='Enter your email'
                     {...field}
                   />
@@ -130,7 +155,7 @@ const RegisterForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <PasswordInput
-                    disabled={loading}
+                    disabled={isLoadingCombined}
                     placeholder='Enter your password'
                     {...field}
                   />
@@ -145,7 +170,7 @@ const RegisterForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <PasswordInput
-                    disabled={loading}
+                    disabled={isLoadingCombined}
                     placeholder='Enter your confirm password'
                     {...field}
                   />
@@ -154,9 +179,18 @@ const RegisterForm: React.FC = () => {
               )}
             />
 
-            <Button disabled={loading} className='mt-5 w-full'>
-              {loading ? <BeatLoader size={20} color='#fff' /> : 'Register'}
+            <Button disabled={isLoadingCombined} className='mt-5 w-full'>
+              {isLoadingCombined ? (
+                <BeatLoader size={20} color='#fff' />
+              ) : (
+                'Register'
+              )}
             </Button>
+            {isErrorMutation && (
+              <p className='mt-2 text-red-500'>
+                Error: {mutationError?.message}
+              </p>
+            )}
           </motion.form>
         </Form>
         <p className='text-sm-regular text-center text-neutral-950'>
