@@ -6,6 +6,7 @@ import logo from '@/assets/images/logo.png';
 import { Search } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Menu } from 'lucide-react';
+import { PenLine } from 'lucide-react';
 import {
   Sheet,
   SheetTrigger,
@@ -13,6 +14,13 @@ import {
   SheetClose,
   SheetHeader,
 } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Icon } from '@iconify/react';
 
 const Navbar: React.FC = () => {
   const { scrollY } = useScroll();
@@ -53,14 +61,16 @@ const Navbar: React.FC = () => {
             />
           </Link>
           <div className='focus-within:border-primary-300 flex h-12 w-93.25 items-center gap-2 rounded-xl border border-neutral-300 px-4 py-3 max-lg:hidden'>
-            <Search className='hover:text-primary-300 size-6 text-neutral-500' />
+            <Search className='hover:text-primary-300 size-6 cursor-pointer text-neutral-500' />
             <input
               type='text'
               placeholder='Search'
               className='text-sm-regular w-full text-neutral-950 outline-none placeholder:text-neutral-500'
             />
           </div>
-          <div className='flex items-center justify-center gap-6 max-lg:hidden'>
+
+          {/* navbar before login */}
+          {/* <div className='flex items-center justify-center gap-6 max-lg:hidden'>
             <Link
               to='login'
               className='text-sm-semibold text-primary-300 underline underline-offset-3 hover:scale-105'
@@ -109,11 +119,52 @@ const Navbar: React.FC = () => {
                 </div>
               </SheetContent>
             </Sheet>
+          </div> */}
+
+          {/* navbar after login */}
+          <div className='flex items-center justify-center gap-6'>
+            <Link
+              to='/'
+              className='text-sm-semibold text-primary-300 flex items-center gap-2 underline underline-offset-3 hover:scale-105 max-lg:hidden'
+            >
+              <PenLine className='text-primary-300 size-6' />
+              Write Post
+            </Link>
+            <div className='h-6 w-[1px] flex-shrink-0 bg-neutral-300 max-lg:hidden' />
+            <Search
+              className='hover:text-primary-300 size-6 cursor-pointer text-neutral-500 lg:hidden'
+              onClick={() => setIsMobileSearchBarOpen(!isMobileSearchBarOpen)}
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <div className='group flex cursor-pointer items-center gap-3'>
+                  <div className='flex-center group-hover:border-primary-300 size-10 rounded-full border border-neutral-500 object-contain p-1 group-hover:scale-105'>
+                    <Icon
+                      icon='mingcute:user-add-fill'
+                      className='group-hover:text-primary-300 size-full text-neutral-500'
+                    />
+                  </div>
+                  <span className='text-sm-medium group-hover:text-primary-300 text-neutral-900 max-lg:hidden'>
+                    data api
+                  </span>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem>
+                  <Icon icon='lets-icons:user' /> Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Icon icon='solar:logout-outline' /> Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </motion.header>
+
+      {/* search bar visible in mobile at bottom of navbar */}
       <div
-        className={`fixed top-0 left-0 z-40 w-full bg-white transition-all duration-300 ease-in-out ${isMobileSearchBarOpen ? 'visible translate-y-full opacity-100' : 'invisible translate-y-0 opacity-0'} lg:hidden`}
+        className={`fixed top-0 left-0 z-30 w-full bg-white transition-all duration-300 ease-in-out ${isMobileSearchBarOpen ? 'visible translate-y-full opacity-100' : 'invisible translate-y-0 opacity-0'} lg:hidden`}
         style={{ top: generateClamp(16, 32, 1248) }}
       >
         <div className='custom-container py-1'>
