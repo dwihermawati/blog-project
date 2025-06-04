@@ -17,6 +17,8 @@ import PasswordInput from '../ui/input-password';
 import { Button } from '../ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import useLogin from '@/hooks/useLogin';
+import { useAuth } from '@/contexts/AuthContext';
+import userService from '@/services/userService';
 
 const loginSchema = z.object({
   email: z
@@ -30,6 +32,7 @@ const loginSchema = z.object({
 const LoginForm: React.FC = () => {
   const controls = useAnimation();
   const navigate = useNavigate();
+  const auth = useAuth();
 
   const shakeAnimation = {
     x: [0, -10, 10, -10, 10, 0],
@@ -45,10 +48,20 @@ const LoginForm: React.FC = () => {
   });
 
   const { mutate: loginUser, isPending: isLoadingLogin } = useLogin({
-    onSuccess: (data, variables) => {
-      localStorage.setItem('authToken', data.token);
-      localStorage.setItem('userEmail', variables.email);
-
+    onSuccess: async (data, variables) => {
+      try {
+        const userProfile = await userService.getUserByEmail(
+          variables.email,
+          data.token
+        );
+        auth.login(data, variables.email, userProfile);
+      } catch (profileError: any) {
+        console.error(
+          'Failed to fetch user profile after login:',
+          profileError
+        );
+        auth.login(data, variables.email);
+      }
       alert('Login successful! Welcome back.');
 
       form.reset();

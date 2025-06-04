@@ -11,8 +11,6 @@ const useLogin = (options?: LoginOptions) => {
   return useMutation<LoginSuccessResponse, Error, LoginPayload>({
     mutationFn: authService.login,
     onSuccess: (data, variables) => {
-      console.log('Login successful (hook):', data);
-
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('userEmail', variables.email);
 

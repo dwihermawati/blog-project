@@ -1,7 +1,7 @@
 import { generateClamp } from '@/function/generate-clamp';
 import { motion, useScroll, useTransform } from 'motion/react';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from '@/assets/images/logo.png';
 import { Search } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -21,6 +21,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Icon } from '@iconify/react';
+import { useAuth } from '@/contexts/AuthContext';
+import useUser from '@/hooks/useUser';
 
 const Navbar: React.FC = () => {
   const { scrollY } = useScroll();
@@ -36,6 +38,19 @@ const Navbar: React.FC = () => {
   );
 
   const [isMobileSearchBarOpen, setIsMobileSearchBarOpen] = useState(false);
+
+  const { isAuthenticated, user: authUser, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const { data: userData, isLoading: isUserLoading } = useUser();
+
+  const displayUserName = userData?.name || authUser?.email || 'User';
+  const displayAvatarUrl = userData?.avatarURL;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <>
@@ -69,96 +84,118 @@ const Navbar: React.FC = () => {
             />
           </div>
 
-          {/* navbar before login */}
-          {/* <div className='flex items-center justify-center gap-6 max-lg:hidden'>
-            <Link
-              to='login'
-              className='text-sm-semibold text-primary-300 underline underline-offset-3 hover:scale-105'
-            >
-              Login
-            </Link>
-            <div className='h-6 w-[1px] flex-shrink-0 bg-neutral-300' />
-            <Link to='/register'>
-              <Button>Register</Button>
-            </Link>
-          </div>
-          <div className='flex items-center justify-end gap-6 lg:hidden'>
-            <Search
-              className='hover:text-primary-300 size-6 cursor-pointer text-neutral-500'
-              onClick={() => setIsMobileSearchBarOpen(!isMobileSearchBarOpen)}
-            />
-            <Sheet>
-              <SheetTrigger asChild>
-                <Menu className='cursor-pointer lg:hidden' />
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader className='flex-start h-16 border-b border-b-neutral-300'>
-                  <SheetClose asChild>
-                    <Link
-                      to='/'
-                      className='cursor-pointer transition-transform hover:scale-110'
-                    >
-                      <img src={logo} alt='Logo' className='h-auto w-26.5' />
-                    </Link>
-                  </SheetClose>
-                </SheetHeader>
-                <div className='flex-center mt-10 flex-col gap-4'>
-                  <SheetClose asChild>
-                    <Link
-                      to='login'
-                      className='text-sm-semibold text-primary-300 underline underline-offset-3 hover:scale-105'
-                    >
-                      Login
-                    </Link>
-                  </SheetClose>
-                  <SheetClose asChild>
-                    <Link to='/register'>
-                      <Button>Register</Button>
-                    </Link>
-                  </SheetClose>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div> */}
-
           {/* navbar after login */}
-          <div className='flex items-center justify-center gap-6'>
-            <Link
-              to='/'
-              className='text-sm-semibold text-primary-300 flex items-center gap-2 underline underline-offset-3 hover:scale-105 max-lg:hidden'
-            >
-              <PenLine className='text-primary-300 size-6' />
-              Write Post
-            </Link>
-            <div className='h-6 w-[1px] flex-shrink-0 bg-neutral-300 max-lg:hidden' />
-            <Search
-              className='hover:text-primary-300 size-6 cursor-pointer text-neutral-500 lg:hidden'
-              onClick={() => setIsMobileSearchBarOpen(!isMobileSearchBarOpen)}
-            />
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <div className='group flex cursor-pointer items-center gap-3'>
-                  <div className='flex-center group-hover:border-primary-300 size-10 rounded-full border border-neutral-500 object-contain p-1 group-hover:scale-105'>
-                    <Icon
-                      icon='mingcute:user-add-fill'
-                      className='group-hover:text-primary-300 size-full text-neutral-500'
-                    />
+          {isAuthenticated ? (
+            <div className='flex items-center justify-center gap-6'>
+              <Link
+                to='/write-post'
+                className='text-sm-semibold text-primary-300 flex items-center gap-2 underline underline-offset-3 hover:scale-105 max-lg:hidden'
+              >
+                <PenLine className='text-primary-300 size-6' />
+                Write Post
+              </Link>
+              <div className='h-6 w-[1px] flex-shrink-0 bg-neutral-300 max-lg:hidden' />
+              <Search
+                className='hover:text-primary-300 size-6 cursor-pointer text-neutral-500 lg:hidden'
+                onClick={() => setIsMobileSearchBarOpen(!isMobileSearchBarOpen)}
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <div className='group flex cursor-pointer items-center gap-3'>
+                    <div className='flex-center group-hover:border-primary-300 size-10 rounded-full border border-neutral-500 object-contain p-1 group-hover:scale-105'>
+                      {isUserLoading ? (
+                        <div className='flex-center size-full animate-pulse rounded-full bg-gray-200'></div>
+                      ) : displayAvatarUrl ? (
+                        <img
+                          src={displayAvatarUrl}
+                          alt='Profile'
+                          className='size-full rounded-full object-cover'
+                        />
+                      ) : (
+                        <Icon
+                          icon='mingcute:user-add-fill'
+                          className='group-hover:text-primary-300 size-full text-neutral-500'
+                        />
+                      )}
+                    </div>
+                    <span className='text-sm-medium group-hover:text-primary-300 text-neutral-900 max-lg:hidden'>
+                      {isUserLoading ? 'Loading...' : displayUserName}
+                    </span>
                   </div>
-                  <span className='text-sm-medium group-hover:text-primary-300 text-neutral-900 max-lg:hidden'>
-                    data api
-                  </span>
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>
-                  <Icon icon='lets-icons:user' /> Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Icon icon='solar:logout-outline' /> Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem asChild>
+                    <Link to='/profile'>
+                      <Icon icon='lets-icons:user' /> Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <Icon icon='solar:logout-outline' /> Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
+            <>
+              {/* navbar before login */}
+              <div className='flex items-center justify-center gap-6 max-lg:hidden'>
+                <Link
+                  to='login'
+                  className='text-sm-semibold text-primary-300 underline underline-offset-3 hover:scale-105'
+                >
+                  Login
+                </Link>
+                <div className='h-6 w-[1px] flex-shrink-0 bg-neutral-300' />
+                <Link to='/register'>
+                  <Button>Register</Button>
+                </Link>
+              </div>
+              <div className='flex items-center justify-end gap-6 lg:hidden'>
+                <Search
+                  className='hover:text-primary-300 size-6 cursor-pointer text-neutral-500'
+                  onClick={() =>
+                    setIsMobileSearchBarOpen(!isMobileSearchBarOpen)
+                  }
+                />
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Menu className='cursor-pointer lg:hidden' />
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader className='flex-start h-16 border-b border-b-neutral-300'>
+                      <SheetClose asChild>
+                        <Link
+                          to='/'
+                          className='cursor-pointer transition-transform hover:scale-110'
+                        >
+                          <img
+                            src={logo}
+                            alt='Logo'
+                            className='h-auto w-26.5'
+                          />
+                        </Link>
+                      </SheetClose>
+                    </SheetHeader>
+                    <div className='flex-center mt-10 flex-col gap-4'>
+                      <SheetClose asChild>
+                        <Link
+                          to='login'
+                          className='text-sm-semibold text-primary-300 underline underline-offset-3 hover:scale-105'
+                        >
+                          Login
+                        </Link>
+                      </SheetClose>
+                      <SheetClose asChild>
+                        <Link to='/register'>
+                          <Button>Register</Button>
+                        </Link>
+                      </SheetClose>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            </>
+          )}
         </div>
       </motion.header>
 
