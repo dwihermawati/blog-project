@@ -2,6 +2,17 @@ import React, { useState } from 'react';
 import useBlogPosts from '@/hooks/useBlogPosts';
 import BlogCard from './BlogCard';
 import PaginationControls from '@/components/shared/PaginationControls';
+import EmptyState from '../shared/EmptyState';
+
+interface BlogListEmptyStateProps {
+  title: string;
+  description: string;
+  button?: boolean;
+  buttonIcon?: React.ReactNode;
+  buttonText?: string;
+  buttonLink?: string;
+  className?: string;
+}
 
 interface BlogListProps {
   initialPage?: number;
@@ -12,10 +23,10 @@ interface BlogListProps {
   showTitle?: boolean;
   titleText?: string;
   cardVariant?: 'blogpost' | 'most-liked' | 'user-blogpost';
-  emptyMessage?: string;
   className?: string;
   enabled?: boolean;
   showPagination?: boolean;
+  emptyStateConfig?: BlogListEmptyStateProps;
 }
 
 const BlogList: React.FC<BlogListProps> = ({
@@ -27,9 +38,9 @@ const BlogList: React.FC<BlogListProps> = ({
   showTitle = true,
   titleText = 'Blog Posts',
   cardVariant = 'blogpost',
-  emptyMessage = 'No posts found.',
   className,
   showPagination = true,
+  emptyStateConfig,
 }) => {
   const [currentPage, setCurrentPage] = useState(initialPage);
 
@@ -90,10 +101,17 @@ const BlogList: React.FC<BlogListProps> = ({
         </>
       ) : (
         !isPostsLoading &&
-        !isPostsError && (
-          <div className='text-muted-foreground mt-4 text-center'>
-            {emptyMessage}
-          </div>
+        !isPostsError &&
+        emptyStateConfig && (
+          <EmptyState
+            title={emptyStateConfig.title}
+            description={emptyStateConfig.description}
+            button={emptyStateConfig.button}
+            buttonIcon={emptyStateConfig.buttonIcon}
+            buttonText={emptyStateConfig.buttonText}
+            buttonLink={emptyStateConfig.buttonLink}
+            className={emptyStateConfig.className}
+          />
         )
       )}
     </div>

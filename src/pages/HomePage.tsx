@@ -25,7 +25,7 @@ const HomePage: React.FC = () => {
           />
         </div>
 
-        <div className='flex w-full flex-col gap-4 md:gap-6'>
+        {/* <div className='flex w-full flex-col gap-4 md:gap-6'>
           <BlogList
             sortBy='most-liked'
             showTitle={true}
@@ -35,7 +35,7 @@ const HomePage: React.FC = () => {
             emptyMessage='No liked posts yet.'
             showPagination={false}
           />
-        </div>
+        </div> */}
       </main>
       <Footer />
     </>

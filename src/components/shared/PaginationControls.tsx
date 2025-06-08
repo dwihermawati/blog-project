@@ -68,10 +68,10 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
         variant='icon'
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1 || isLoading}
-        className='pr-0 pl-0 md:pr-4'
+        className='group pr-0 pl-0 md:pr-4'
       >
-        <ChevronLeft className='mr-1.5 size-6' />
-        <span className='text-xs-regular md:text-sm-regular text-neutral-900'>
+        <ChevronLeft className='group-hover:text-primary-300 mr-1.5 size-6 group-hover:scale-110' />
+        <span className='text-xs-regular md:text-sm-regular group-hover:text-primary-300 text-neutral-900 group-hover:scale-105'>
           Previous
         </span>
       </Button>
@@ -98,7 +98,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
                   disabled={isLoading}
                   className='flex-center size-9 rounded-full px-0 md:size-12'
                 >
-                  <span className='text-xs-regular md:text-sm-regular'>
+                  <span className='text-xs-regular md:text-sm-regular hover:scale-105'>
                     {page}
                   </span>
                 </Button>
@@ -112,12 +112,12 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
         variant='icon'
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === lastPage || isLoading}
-        className='pr-0 pl-0 md:pl-4'
+        className='group pr-0 pl-0 md:pl-4'
       >
-        <span className='text-xs-regular md:text-sm-regular text-neutral-900'>
+        <span className='text-xs-regular md:text-sm-regular group-hover:text-primary-300 text-neutral-900 group-hover:scale-105'>
           Next
         </span>
-        <ChevronRight className='ml-1.5 size-6' />
+        <ChevronRight className='group-hover:text-primary-300 ml-1.5 size-6 group-hover:scale-110' />
       </Button>
     </div>
   );
