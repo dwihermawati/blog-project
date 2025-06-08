@@ -9,13 +9,14 @@ const HomePage: React.FC = () => {
     <>
       <Navbar />
       <main
-        className='custom-container flex flex-wrap gap-12 max-md:flex-col'
+        className='custom-container grid w-full lg:grid-cols-[minmax(700px,855px)_minmax(200px,297px)]'
         style={{
           marginBlockStart: generateClamp(88, 128, 1248),
           marginBlockEnd: generateClamp(24, 156, 1248),
+          gap: generateClamp(24, 48, 1248),
         }}
       >
-        <div className='flex w-full flex-col gap-4 md:gap-6'>
+        <div className='flex w-full flex-col gap-4 max-lg:border-b-[6px] max-lg:border-b-neutral-300 max-lg:pb-6 lg:gap-6 lg:border-r lg:border-r-neutral-300 lg:pr-12'>
           <BlogList
             sortBy='recommended'
             showTitle={true}
@@ -25,17 +26,16 @@ const HomePage: React.FC = () => {
           />
         </div>
 
-        {/* <div className='flex w-full flex-col gap-4 md:gap-6'>
+        <div className='flex w-full flex-col gap-4 md:gap-6'>
           <BlogList
             sortBy='most-liked'
             showTitle={true}
             titleText='Most Liked Posts'
             itemsPerPage={3}
             cardVariant='most-liked'
-            emptyMessage='No liked posts yet.'
             showPagination={false}
           />
-        </div> */}
+        </div>
       </main>
       <Footer />
     </>
