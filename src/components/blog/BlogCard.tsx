@@ -33,7 +33,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
       )}
     >
       {(variant === 'blogpost' || variant === 'user-blogpost') && (
-        <div className='h-64.5 w-85 overflow-hidden rounded-sm border border-red-500 max-md:hidden'>
+        <div className='h-64.5 w-85 overflow-hidden rounded-sm border border-neutral-200 max-md:hidden'>
           <img
             src={post.imageUrl}
             alt={post.title}
