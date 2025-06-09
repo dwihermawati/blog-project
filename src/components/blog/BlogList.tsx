@@ -19,7 +19,7 @@ interface BlogListProps {
   itemsPerPage?: number;
   searchQuery?: string;
   userId?: number;
-  sortBy?: 'recommended' | 'most-liked';
+  sortBy?: 'recommended' | 'most-liked' | 'search';
   showTitle?: boolean;
   titleText?: string;
   cardVariant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -27,6 +27,7 @@ interface BlogListProps {
   enabled?: boolean;
   showPagination?: boolean;
   emptyStateConfig?: BlogListEmptyStateProps;
+  queryKeyPrefix: string[];
 }
 
 const BlogList: React.FC<BlogListProps> = ({
@@ -41,6 +42,7 @@ const BlogList: React.FC<BlogListProps> = ({
   className,
   showPagination = true,
   emptyStateConfig,
+  queryKeyPrefix,
 }) => {
   const [currentPage, setCurrentPage] = useState(initialPage);
 
@@ -57,12 +59,35 @@ const BlogList: React.FC<BlogListProps> = ({
     isLoading: isPostsLoading,
     isError: isPostsError,
     error: postsError,
-  } = useBlogPosts(queryParams);
+  } = useBlogPosts({
+    ...queryParams,
+    queryKeyPrefix,
+    enabled: true,
+  });
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  if (
+    !isPostsLoading &&
+    !isPostsError &&
+    blogData?.data?.length === 0 &&
+    emptyStateConfig
+  ) {
+    return (
+      <EmptyState
+        title={emptyStateConfig.title}
+        description={emptyStateConfig.description}
+        button={emptyStateConfig.button}
+        buttonIcon={emptyStateConfig.buttonIcon}
+        buttonText={emptyStateConfig.buttonText}
+        buttonLink={emptyStateConfig.buttonLink}
+        className={emptyStateConfig.className}
+      />
+    );
+  }
 
   return (
     <div className={className}>
@@ -79,15 +104,22 @@ const BlogList: React.FC<BlogListProps> = ({
         </div>
       )}
 
-      {!isPostsLoading &&
-      !isPostsError &&
-      blogData?.data &&
-      blogData.data.length > 0 ? (
+      {blogData?.data && blogData.data.length > 0 && (
         <>
           <div className='grid grid-cols-1 gap-4 md:gap-6'>
-            {blogData.data.map((post) => (
-              <BlogCard key={post.id} post={post} variant={cardVariant} />
-            ))}
+            {blogData.data.map((post, index) => {
+              const isLastItem =
+                index === blogData.data.length - 1 &&
+                (!showPagination || blogData.lastPage <= 1);
+              return (
+                <BlogCard
+                  key={post.id}
+                  post={post}
+                  variant={cardVariant}
+                  isLastItem={isLastItem}
+                />
+              );
+            })}
           </div>
 
           {showPagination && blogData.lastPage > 1 && (
@@ -99,20 +131,6 @@ const BlogList: React.FC<BlogListProps> = ({
             />
           )}
         </>
-      ) : (
-        !isPostsLoading &&
-        !isPostsError &&
-        emptyStateConfig && (
-          <EmptyState
-            title={emptyStateConfig.title}
-            description={emptyStateConfig.description}
-            button={emptyStateConfig.button}
-            buttonIcon={emptyStateConfig.buttonIcon}
-            buttonText={emptyStateConfig.buttonText}
-            buttonLink={emptyStateConfig.buttonLink}
-            className={emptyStateConfig.className}
-          />
-        )
       )}
     </div>
   );

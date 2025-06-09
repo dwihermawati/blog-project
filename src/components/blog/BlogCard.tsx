@@ -15,6 +15,7 @@ type BlogCardProps = {
   post: BlogPost;
   avatarUrl?: string;
   displayName?: string;
+  isLastItem?: boolean;
 };
 
 const BlogCard: React.FC<BlogCardProps> = ({
@@ -22,14 +23,16 @@ const BlogCard: React.FC<BlogCardProps> = ({
   avatarUrl,
   variant = 'blogpost',
   displayName = post.author.name,
+  isLastItem,
 }) => {
   const hasAvatar = !!avatarUrl;
 
   return (
     <div
       className={cn(
-        'flex w-full items-center gap-6 border-b border-b-neutral-300 pb-4',
-        variant === 'blogpost' ? 'md:pb-6' : 'md:pb-5'
+        'flex w-full items-center gap-6 pb-4',
+        variant === 'blogpost' ? 'md:pb-6' : 'md:pb-5',
+        !isLastItem && 'border-b border-b-neutral-300'
       )}
     >
       {(variant === 'blogpost' || variant === 'user-blogpost') && (

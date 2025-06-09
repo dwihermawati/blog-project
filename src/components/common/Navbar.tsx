@@ -1,7 +1,7 @@
 import { generateClamp } from '@/function/generate-clamp';
 import { motion, useScroll, useTransform } from 'motion/react';
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '@/assets/images/logo.png';
 import { Search } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -55,6 +55,28 @@ const Navbar: React.FC = () => {
     navigate('/');
   };
 
+  const location = useLocation();
+  const isSearchPage = location.pathname === '/search';
+  const [searchInputValue, setSearchInputValue] = useState('');
+  const handleSearch = () => {
+    if (searchInputValue.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchInputValue.trim())}`);
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const query = params.get('query') || '';
+    setSearchInputValue(query);
+
+    if (isSearchPage) {
+      setIsMobileSearchBarOpen(true);
+    } else {
+      setIsMobileSearchBarOpen(false);
+      setSearchInputValue('');
+    }
+  }, [location]);
+
   return (
     <>
       <motion.header
@@ -79,11 +101,21 @@ const Navbar: React.FC = () => {
             />
           </Link>
           <div className='focus-within:border-primary-300 flex h-12 w-93.25 items-center gap-2 rounded-xl border border-neutral-300 px-4 py-3 max-lg:hidden'>
-            <Search className='hover:text-primary-300 size-6 cursor-pointer text-neutral-500' />
+            <Search
+              className='hover:text-primary-300 size-6 cursor-pointer text-neutral-500'
+              onClick={handleSearch}
+            />
             <input
               type='text'
               placeholder='Search'
               className='text-sm-regular w-full text-neutral-950 outline-none placeholder:text-neutral-500'
+              value={searchInputValue}
+              onChange={(e) => setSearchInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
             />
           </div>
 
@@ -213,11 +245,21 @@ const Navbar: React.FC = () => {
       >
         <div className='custom-container py-1'>
           <div className='flex-start focus-within:border-primary-300 h-12 w-full gap-2 rounded-xl border border-neutral-300 px-4 py-3'>
-            <Search className='hover:text-primary-300 size-6 text-neutral-500' />
+            <Search
+              className='hover:text-primary-300 size-6 text-neutral-500'
+              onClick={handleSearch}
+            />
             <input
               type='text'
               placeholder='Search'
               className='text-sm-regular w-full text-neutral-950 outline-none placeholder:text-neutral-500'
+              value={searchInputValue}
+              onChange={(e) => setSearchInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
             />
           </div>
         </div>

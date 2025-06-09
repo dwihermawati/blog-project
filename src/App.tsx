@@ -4,6 +4,7 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import './index.css';
 import { AuthProvider } from './contexts/AuthContext';
+import SearchResultsPage from './pages/SearchResultsPage';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route path='/' element={<HomePage />} />
           <Route path='/login' element={<LoginPage />} />
           <Route path='/register' element={<RegisterPage />} />
+          <Route path='/search' element={<SearchResultsPage />} />
         </Routes>
       </AuthProvider>
     </Router>

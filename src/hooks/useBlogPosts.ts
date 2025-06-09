@@ -7,8 +7,9 @@ interface UseBlogPostsParams {
   limit?: number;
   search?: string;
   userId?: number;
-  sortBy?: 'recommended' | 'most-liked';
+  sortBy?: 'recommended' | 'most-liked' | 'search';
   enabled?: boolean;
+  queryKeyPrefix?: string[];
 }
 
 const useBlogPosts = (params: UseBlogPostsParams = {}) => {
@@ -19,10 +20,11 @@ const useBlogPosts = (params: UseBlogPostsParams = {}) => {
     userId,
     sortBy,
     enabled = true,
+    queryKeyPrefix = ['blogPosts']
   } = params;
 
   return useQuery<BlogListResponse, Error>({
-    queryKey: ['blogPosts', sortBy, page, limit, search, userId],
+    queryKey: [...queryKeyPrefix, sortBy, page, limit, search, userId],
     queryFn: async () =>
       blogService.getPosts({ page, limit, search, userId, sortBy }),
     placeholderData: (previousData) => previousData,

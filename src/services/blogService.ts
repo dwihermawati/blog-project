@@ -8,12 +8,17 @@ interface GetPostsParams {
   page?: number;
   search?: string;
   userId?: number;
-  sortBy?: 'recommended' | 'most-liked';
+  sortBy?: 'recommended' | 'most-liked' | 'search';
 }
 
 const blogService = {
   getPosts: async (params?: GetPostsParams): Promise<BlogListResponse> => {
     let path = '/posts';
+    const requestParams: any = {
+      limit: params?.limit || 5,
+      page: params?.page || 1,
+      userId: params?.userId,
+    };
 
     if (params?.sortBy === 'recommended') {
       path = '/posts/recommended';
@@ -21,16 +26,12 @@ const blogService = {
       path = '/posts/most-liked';
     } else if (params?.search) {
       path = '/posts/search';
+      requestParams.query = params.search;
     }
 
     try {
       const response = await apiClient.get<BlogListResponse>(path, {
-        params: {
-          limit: params?.limit || 5,
-          page: params?.page || 1,
-          search: params?.search,
-          userId: params?.userId,
-        },
+        params: requestParams,
       });
       return response.data;
     } catch (error: any) {
