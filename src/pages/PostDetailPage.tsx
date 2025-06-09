@@ -1,6 +1,7 @@
 import BlogList from '@/components/blog/BlogList';
 import { Footer } from '@/components/common/Footer';
 import Navbar from '@/components/common/Navbar';
+import AvatarDisplay from '@/components/shared/AvatarDisplay';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,20 +11,13 @@ import usePostDetail from '@/hooks/usePostDetail';
 import useUser from '@/hooks/useUser';
 import capitalizeName from '@/lib/capitalizeName';
 import { formatDateTime } from '@/lib/formatDateTime';
-import getColorAvatar from '@/lib/getColorAvatar';
-import getInitials from '@/lib/getInitials';
 import { Icon } from '@iconify/react';
 import { ThumbsUp } from 'lucide-react';
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { BeatLoader } from 'react-spinners';
 
-type AvatarProps = {
-  avatarUrl?: string;
-  displayName?: string;
-};
-
-const PostDetailPage: React.FC<AvatarProps> = ({ avatarUrl, displayName }) => {
+const PostDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const postId = id ? parseInt(id) : undefined;
 
@@ -37,24 +31,20 @@ const PostDetailPage: React.FC<AvatarProps> = ({ avatarUrl, displayName }) => {
     enabled: !!postId,
   });
 
-  const hasAvatar = !!avatarUrl;
-  const nameToDisplay = displayName ?? post?.author.name ?? 'Unknown';
-
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user: authUser } = useAuth();
   const { data: userData, isLoading: isUserLoading } = useUser();
 
-  const commentAvatarUrl = userData?.avatarURL;
-  const commentDisplayName = userData?.name || 'User';
+  const currentUserAvatarUrl = userData?.avatarUrl;
+  const currentUserDisplayName = userData?.name || authUser?.email || 'User';
 
   return (
     <>
       <Navbar />
       <main
-        className='custom-container flex max-w-200 flex-col'
+        className='custom-container flex max-w-200 flex-col gap-3 md:gap-4'
         style={{
           marginBlockStart: generateClamp(88, 128, 1248),
           marginBlockEnd: generateClamp(24, 156, 1248),
-          gap: generateClamp(12, 16, 1248),
         }}
       >
         {isLoading ? (
@@ -80,26 +70,14 @@ const PostDetailPage: React.FC<AvatarProps> = ({ avatarUrl, displayName }) => {
             </div>
             <div className='flex items-center gap-3'>
               <div className='group flex-start flex-shrink-0 cursor-pointer gap-2'>
-                {hasAvatar ? (
-                  <img
-                    src={avatarUrl}
-                    alt={displayName}
-                    className='aspect-square h-auto rounded-full object-cover transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-110'
-                    style={{ width: generateClamp(30, 40, 1248) }}
-                  />
-                ) : (
-                  <div
-                    className='flex-center text-md-semibold aspect-square h-auto rounded-full text-white uppercase transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-110'
-                    style={{
-                      width: generateClamp(30, 40, 1248),
-                      backgroundColor: getColorAvatar(nameToDisplay),
-                    }}
-                  >
-                    {getInitials(nameToDisplay)}
-                  </div>
-                )}
+                <AvatarDisplay
+                  avatarUrl={post.author.avatarUrl}
+                  displayName={post.author.name}
+                  sizeClass='size-10'
+                  className='group-hover:scale-105 group-hover:brightness-110'
+                />
                 <span className='md:text-sm-medium text-xs-regular group-hover:text-primary-300 text-neutral-900'>
-                  {capitalizeName(nameToDisplay)}
+                  {capitalizeName(post.author.name)}
                 </span>
               </div>
               <div className='size-1 flex-shrink-0 rounded-full bg-neutral-400' />
@@ -145,27 +123,19 @@ const PostDetailPage: React.FC<AvatarProps> = ({ avatarUrl, displayName }) => {
                 <div className='flex flex-col gap-3'>
                   <div className='group flex cursor-pointer items-center gap-3'>
                     {isUserLoading ? (
-                      <div className='flex-center size-10 animate-pulse rounded-full bg-gray-200 transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-110'></div>
-                    ) : commentAvatarUrl ? (
-                      <img
-                        src={commentAvatarUrl}
-                        alt='Profile'
-                        className='size-full rounded-full object-cover'
-                      />
+                      <div className='flex-center size-10 animate-pulse rounded-full bg-gray-200'></div>
                     ) : (
-                      <div
-                        className='flex-center text-md-semibold size-10 rounded-full text-white uppercase transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-110'
-                        style={{
-                          backgroundColor: getColorAvatar(commentDisplayName),
-                        }}
-                      >
-                        {getInitials(commentDisplayName)}
-                      </div>
+                      <AvatarDisplay
+                        avatarUrl={currentUserAvatarUrl}
+                        displayName={currentUserDisplayName}
+                        sizeClass='size-10'
+                        className='group-hover:scale-105 group-hover:brightness-110'
+                      />
                     )}
                     <span className='text-sm-medium group-hover:text-primary-300 text-neutral-900 max-lg:hidden'>
                       {isUserLoading
                         ? 'Loading...'
-                        : capitalizeName(commentDisplayName)}
+                        : capitalizeName(currentUserDisplayName)}
                     </span>
                   </div>
                   <Label>Give your Comments</Label>

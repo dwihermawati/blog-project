@@ -1,32 +1,25 @@
 import { generateClamp } from '@/function/generate-clamp';
 import capitalizeName from '@/lib/capitalizeName';
 import { formatDateTime } from '@/lib/formatDateTime';
-import getColorAvatar from '@/lib/getColorAvatar';
-import getInitials from '@/lib/getInitials';
 import { cn } from '@/lib/utils';
 import { BlogPost } from '@/types/blog';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ThumbsUp } from 'lucide-react';
 import { Icon } from '@iconify/react';
+import AvatarDisplay from '../shared/AvatarDisplay';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
   post: BlogPost;
-  avatarUrl?: string;
-  displayName?: string;
   isLastItem?: boolean;
 };
 
 const BlogCard: React.FC<BlogCardProps> = ({
   post,
-  avatarUrl,
   variant = 'blogpost',
-  displayName = post.author.name,
   isLastItem,
 }) => {
-  const hasAvatar = !!avatarUrl;
-
   return (
     <div
       className={cn(
@@ -115,26 +108,15 @@ const BlogCard: React.FC<BlogCardProps> = ({
         {variant === 'blogpost' && (
           <div className='flex items-center gap-3'>
             <div className='group flex-start flex-shrink-0 cursor-pointer gap-2'>
-              {hasAvatar ? (
-                <img
-                  src={avatarUrl}
-                  alt={displayName}
-                  className='aspect-square h-auto rounded-full object-cover transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-110'
-                  style={{ width: generateClamp(30, 40, 1248) }}
-                />
-              ) : (
-                <div
-                  className='flex-center text-md-semibold aspect-square h-auto rounded-full text-white uppercase transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-110'
-                  style={{
-                    width: generateClamp(30, 40, 1248),
-                    backgroundColor: getColorAvatar(displayName),
-                  }}
-                >
-                  {getInitials(displayName)}
-                </div>
-              )}
+              <AvatarDisplay
+                avatarUrl={post.author.avatarUrl}
+                displayName={post.author.name}
+                sizeClass='size-10'
+                style={{ width: generateClamp(30, 40, 1248) }}
+                className='group-hover:scale-105 group-hover:brightness-110'
+              />
               <span className='md:text-sm-medium text-xs-regular group-hover:text-primary-300 text-neutral-900'>
-                {capitalizeName(displayName)}
+                {capitalizeName(post.author.name)}
               </span>
             </div>
             <div className='size-1 flex-shrink-0 rounded-full bg-neutral-400' />

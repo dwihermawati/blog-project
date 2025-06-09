@@ -23,9 +23,8 @@ import {
 import { Icon } from '@iconify/react';
 import { useAuth } from '@/contexts/AuthContext';
 import useUser from '@/hooks/useUser';
-import getColorAvatar from '@/lib/getColorAvatar';
-import getInitials from '@/lib/getInitials';
 import capitalizeName from '@/lib/capitalizeName';
+import AvatarDisplay from '../shared/AvatarDisplay';
 
 const Navbar: React.FC = () => {
   const { scrollY } = useScroll();
@@ -48,7 +47,7 @@ const Navbar: React.FC = () => {
   const { data: userData, isLoading: isUserLoading } = useUser();
 
   const displayUserName = userData?.name || authUser?.email || 'User';
-  const displayAvatarUrl = userData?.avatarURL;
+  const displayAvatarUrl = userData?.avatarUrl;
 
   const handleLogout = () => {
     logout();
@@ -138,22 +137,14 @@ const Navbar: React.FC = () => {
                 <DropdownMenuTrigger>
                   <div className='group flex cursor-pointer items-center gap-3'>
                     {isUserLoading ? (
-                      <div className='flex-center size-10 animate-pulse rounded-full bg-gray-200 transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-110'></div>
-                    ) : displayAvatarUrl ? (
-                      <img
-                        src={displayAvatarUrl}
-                        alt='Profile'
-                        className='size-full rounded-full object-cover'
-                      />
+                      <div className='flex-center size-10 animate-pulse rounded-full bg-gray-200'></div>
                     ) : (
-                      <div
-                        className='flex-center text-md-semibold size-10 rounded-full text-white uppercase transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-110'
-                        style={{
-                          backgroundColor: getColorAvatar(displayUserName),
-                        }}
-                      >
-                        {getInitials(displayUserName)}
-                      </div>
+                      <AvatarDisplay
+                        avatarUrl={displayAvatarUrl}
+                        displayName={displayUserName}
+                        sizeClass='size-10'
+                        className='group-hover:scale-105 group-hover:brightness-110'
+                      />
                     )}
                     <span className='text-sm-medium group-hover:text-primary-300 text-neutral-900 max-lg:hidden'>
                       {isUserLoading

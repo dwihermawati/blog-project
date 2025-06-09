@@ -4,5 +4,5 @@ export interface UserProfileResponse {
   email: string;
   // password: string;
   headline: string | null;
-  avatarURL: string | null;
+  avatarUrl: string | null;
 }
