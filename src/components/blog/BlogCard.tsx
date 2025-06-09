@@ -36,13 +36,16 @@ const BlogCard: React.FC<BlogCardProps> = ({
       )}
     >
       {(variant === 'blogpost' || variant === 'user-blogpost') && (
-        <div className='h-64.5 w-85 overflow-hidden rounded-sm border border-neutral-200 max-md:hidden'>
+        <Link
+          to={`/posts/${post.id}`}
+          className='h-64.5 w-85 cursor-pointer overflow-hidden rounded-sm border border-neutral-200 hover:scale-101 max-md:hidden'
+        >
           <img
             src={post.imageUrl}
             alt={post.title}
             className='size-full object-cover'
           />
-        </div>
+        </Link>
       )}
       <div className='flex flex-1 flex-col gap-3 md:gap-4'>
         <div
@@ -51,22 +54,24 @@ const BlogCard: React.FC<BlogCardProps> = ({
             variant === 'most-liked' ? 'gap-1' : 'gap-2 md:gap-3'
           )}
         >
-          <h2
-            className={cn(
-              'text-neutral-900',
-              variant === 'most-liked'
-                ? 'text-md-bold'
-                : 'text-md-bold md:text-xl-bold'
-            )}
-          >
-            {post.title}
-          </h2>
+          <Link to={`/posts/${post.id}`}>
+            <h2
+              className={cn(
+                'hover:text-primary-300 cursor-pointer text-neutral-900',
+                variant === 'most-liked'
+                  ? 'text-md-bold'
+                  : 'text-md-bold md:text-xl-bold'
+              )}
+            >
+              {post.title}
+            </h2>
+          </Link>
           {(variant === 'blogpost' || variant === 'user-blogpost') && (
             <div className='flex items-center gap-2'>
               {post.tags.map((tag, idx) => (
                 <div
                   key={idx}
-                  className='text-xs-regular flex-center h-7 w-fit rounded-md border border-neutral-300 bg-white px-2 text-neutral-900'
+                  className='text-xs-regular flex-center h-7 w-fit rounded-md border border-neutral-300 bg-white p-2 text-neutral-900'
                 >
                   {tag}
                 </div>

@@ -12,7 +12,7 @@ const SearchResultsPage: React.FC = () => {
     <>
       <Navbar />
       <main
-        className='custom-container w-full'
+        className='custom-container'
         style={{
           marginBlockStart: generateClamp(88, 128, 1248),
           marginBlockEnd: generateClamp(24, 156, 1248),

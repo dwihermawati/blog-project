@@ -27,7 +27,7 @@ interface BlogListProps {
   enabled?: boolean;
   showPagination?: boolean;
   emptyStateConfig?: BlogListEmptyStateProps;
-  queryKeyPrefix: string[];
+  queryKeyPrefix?: string[];
 }
 
 const BlogList: React.FC<BlogListProps> = ({

@@ -179,7 +179,7 @@ const Navbar: React.FC = () => {
               {/* navbar before login */}
               <div className='flex items-center justify-center gap-6 max-lg:hidden'>
                 <Link
-                  to='login'
+                  to='/login'
                   className='text-sm-semibold text-primary-300 underline underline-offset-3 hover:scale-105'
                 >
                   Login
@@ -218,7 +218,7 @@ const Navbar: React.FC = () => {
                     <div className='flex-center mt-10 flex-col gap-4'>
                       <SheetClose asChild>
                         <Link
-                          to='login'
+                          to='/login'
                           className='text-sm-semibold text-primary-300 underline underline-offset-3 hover:scale-105'
                         >
                           Login

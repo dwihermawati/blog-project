@@ -1,6 +1,6 @@
 import axios from 'axios';
 import apiClient from '@/lib/api';
-import { BlogListResponse } from '@/types/blog';
+import { BlogListResponse, BlogPost } from '@/types/blog';
 import { ApiErrorResponse } from '@/types/auth';
 
 interface GetPostsParams {
@@ -39,6 +39,21 @@ const blogService = {
         const apiError: ApiErrorResponse = error.response.data;
         throw new Error(
           apiError.message || `Failed to fetch post from ${path}.`
+        );
+      } else {
+        throw new Error(error.message || 'Failed to connect to server.');
+      }
+    }
+  },
+  getPostById: async (id: string | number): Promise<BlogPost> => {
+    try {
+      const response = await apiClient.get<BlogPost>(`/posts/${id}`);
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        const apiError: ApiErrorResponse = error.response.data;
+        throw new Error(
+          apiError.message || `Failed to fetch post details with ID: ${id}.`
         );
       } else {
         throw new Error(error.message || 'Failed to connect to server.');
