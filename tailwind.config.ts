@@ -48,5 +48,5 @@ export default {
       keyframes: {},
     },
   },
-  plugins: [customTextPlugin],
+  plugins: [customTextPlugin, require('@tailwindcss/typography')],
 } satisfies Config;

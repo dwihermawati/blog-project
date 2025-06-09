@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { ThumbsUp } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import AvatarDisplay from '../shared/AvatarDisplay';
+import DOMPurify from 'dompurify';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -20,6 +21,15 @@ const BlogCard: React.FC<BlogCardProps> = ({
   variant = 'blogpost',
   isLastItem,
 }) => {
+  const renderSafeHTML = (htmlContent: string) => {
+    const cleanHtml = DOMPurify.sanitize(htmlContent, {
+      USE_PROFILES: { html: true },
+      FORBID_TAGS: ['script'],
+      FORBID_ATTR: ['onerror', 'onload', 'onclick'],
+    });
+    return { __html: cleanHtml };
+  };
+
   return (
     <div
       className={cn(
@@ -71,9 +81,10 @@ const BlogCard: React.FC<BlogCardProps> = ({
               ))}
             </div>
           )}
-          <p className='text-xs-regular md:text-sm-regular line-clamp-2 text-neutral-900'>
-            {post.content}
-          </p>
+          <p
+            className='text-xs-regular md:text-sm-regular line-clamp-2 text-neutral-900'
+            dangerouslySetInnerHTML={renderSafeHTML(post.content)}
+          />
           {variant === 'user-blogpost' && (
             <>
               <div className='flex items-center gap-3'>

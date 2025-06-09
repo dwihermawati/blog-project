@@ -16,6 +16,7 @@ import { ThumbsUp } from 'lucide-react';
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { BeatLoader } from 'react-spinners';
+import DOMPurify from 'dompurify';
 
 const PostDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -36,6 +37,15 @@ const PostDetailPage: React.FC = () => {
 
   const currentUserAvatarUrl = userData?.avatarUrl;
   const currentUserDisplayName = userData?.name || authUser?.email || 'User';
+
+  const renderSafeHTML = (htmlContent: string) => {
+    const cleanHtml = DOMPurify.sanitize(htmlContent, {
+      USE_PROFILES: { html: true },
+      FORBID_TAGS: ['script'],
+      FORBID_ATTR: ['onerror', 'onload', 'onclick'],
+    });
+    return { __html: cleanHtml };
+  };
 
   return (
     <>
@@ -111,9 +121,10 @@ const PostDetailPage: React.FC = () => {
                 className='size-full rounded-sm object-cover'
               />
             </div>
-            <p className='text-sm-regular md:text-md-regular text-neutral-950'>
-              {post.content}
-            </p>
+            <div
+              className='prose-sm md:prose-base text-neutral-950'
+              dangerouslySetInnerHTML={renderSafeHTML(post.content)}
+            />
             <div className='h-[1px] w-full bg-neutral-300' />
             <div className='flex flex-col gap-3'>
               <p className='md:display-xs-bold text-xl-bold text-neutral-900'>
