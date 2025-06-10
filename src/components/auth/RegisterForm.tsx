@@ -4,14 +4,9 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { BeatLoader } from 'react-spinners';
 import { z } from 'zod';
+import { Label } from '@/components/ui/label';
 
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '../ui/input';
 import PasswordInput from '../ui/input-password';
 import { Button } from '../ui/button';
@@ -123,7 +118,7 @@ const RegisterForm: React.FC = () => {
               name='name'
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <Label>Name</Label>
                   <Input
                     disabled={isLoadingCombined}
                     placeholder='Enter your name'
@@ -139,7 +134,7 @@ const RegisterForm: React.FC = () => {
               name='email'
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <Label>Email</Label>
                   <Input
                     disabled={isLoadingCombined}
                     placeholder='Enter your email'
@@ -155,7 +150,7 @@ const RegisterForm: React.FC = () => {
               name='password'
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <Label>Password</Label>
                   <PasswordInput
                     disabled={isLoadingCombined}
                     placeholder='Enter your password'
@@ -171,7 +166,7 @@ const RegisterForm: React.FC = () => {
               name='confirmPassword'
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
+                  <Label>Confirm Password</Label>
                   <PasswordInput
                     disabled={isLoadingCombined}
                     placeholder='Enter your confirm password'

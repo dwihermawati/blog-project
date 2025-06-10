@@ -5,13 +5,7 @@ import { useForm } from 'react-hook-form';
 import { BeatLoader } from 'react-spinners';
 import { z } from 'zod';
 
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '../ui/input';
 import PasswordInput from '../ui/input-password';
 import { Button } from '../ui/button';
@@ -19,6 +13,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import useLogin from '@/hooks/useLogin';
 import { useAuth } from '@/contexts/AuthContext';
 import userService from '@/services/userService';
+import { Label } from '@/components/ui/label';
 
 const loginSchema = z.object({
   email: z
@@ -121,7 +116,7 @@ const LoginForm: React.FC = () => {
               name='email'
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <Label>Email</Label>
                   <Input
                     disabled={isLoadingCombined}
                     placeholder='Enter your email'
@@ -137,7 +132,7 @@ const LoginForm: React.FC = () => {
               name='password'
               render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <Label>Password</Label>
                   <PasswordInput
                     disabled={isLoadingCombined}
                     placeholder='Enter your password'

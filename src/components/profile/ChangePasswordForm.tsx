@@ -66,13 +66,14 @@ const ChangePasswordForm: React.FC = () => {
         <FormField
           control={form.control}
           name='currentPassword'
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem>
               <Label>Current Password</Label>
               <PasswordInput
                 placeholder='Enter current password'
                 disabled={isChangingPassword}
                 {...field}
+                aria-invalid={!!fieldState.error}
               />
               <FormMessage />
             </FormItem>
@@ -81,13 +82,14 @@ const ChangePasswordForm: React.FC = () => {
         <FormField
           control={form.control}
           name='newPassword'
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem>
               <Label>New Password</Label>
               <PasswordInput
                 placeholder='Enter new password'
                 disabled={isChangingPassword}
                 {...field}
+                aria-invalid={!!fieldState.error}
               />
               <FormMessage />
             </FormItem>
@@ -96,13 +98,14 @@ const ChangePasswordForm: React.FC = () => {
         <FormField
           control={form.control}
           name='confirmPassword'
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem>
               <Label>Confirm New Password</Label>
               <PasswordInput
                 placeholder='Confirm new password'
                 disabled={isChangingPassword}
                 {...field}
+                aria-invalid={!!fieldState.error}
               />
               <FormMessage />
             </FormItem>
