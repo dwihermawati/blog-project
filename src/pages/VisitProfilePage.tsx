@@ -24,7 +24,7 @@ const VisitProfilePage: React.FC = () => {
     <>
       <Navbar />
       <main
-        className='custom-container flex max-w-200 flex-col gap-6 md:gap-8'
+        className='custom-container flex max-w-200 flex-col gap-4 md:gap-6'
         style={{
           marginBlockStart: generateClamp(88, 128, 1248),
           marginBlockEnd: generateClamp(24, 156, 1248),
@@ -40,12 +40,12 @@ const VisitProfilePage: React.FC = () => {
           </p>
         ) : (
           <>
-            <div className='group flex items-center gap-2 border-b border-b-neutral-300 pb-4 md:gap-3 md:pb-6'>
+            <div className='flex items-center gap-2 border-b border-b-neutral-300 pb-4 md:gap-3 md:pb-6'>
               <AvatarDisplay
                 avatarUrl={userProfile.avatarUrl}
                 displayName={userProfile.name}
                 style={{ width: generateClamp(40, 80, 1248) }}
-                className='aspect-square h-auto group-hover:scale-105 group-hover:brightness-110'
+                className='aspect-square h-auto'
               />
               <div>
                 <p

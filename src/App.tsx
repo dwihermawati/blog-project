@@ -7,6 +7,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import SearchResultsPage from './pages/SearchResultsPage';
 import PostDetailPage from './pages/PostDetailPage';
 import VisitProfilePage from './pages/VisitProfilePage';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path='/search' element={<SearchResultsPage />} />
           <Route path='/posts/:id' element={<PostDetailPage />} />
           <Route path='/profile/:email' element={<VisitProfilePage />} />
+          <Route path='/profile' element={<ProfilePage />} />
         </Routes>
       </AuthProvider>
     </Router>
