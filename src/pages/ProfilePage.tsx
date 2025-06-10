@@ -11,8 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { PenLine } from 'lucide-react';
 import BlogList from '@/components/blog/BlogList';
-import PasswordInput from '@/components/ui/input-password';
-import { Label } from '@/components/ui/label';
+import ChangePasswordForm from '@/components/profile/ChangePasswordForm';
 
 const ProfilePage: React.FC = () => {
   const {
@@ -115,20 +114,7 @@ const ProfilePage: React.FC = () => {
                 />
               </TabsContent>
               <TabsContent value='changepassword'>
-                <div className='mt-4 flex max-w-134.5 flex-col gap-4 md:mt-5 md:gap-5'>
-                  <div className='space-y-2'>
-                    <Label>Current Password</Label>
-                    <PasswordInput />
-                  </div>
-                  <div className='space-y-2'>
-                    <Label>New Password</Label>
-                    <PasswordInput />
-                  </div>
-                  <div className='space-y-2'>
-                    <Label>Confirm New Password</Label>
-                    <PasswordInput />
-                  </div>
-                </div>
+                <ChangePasswordForm />
               </TabsContent>
             </Tabs>
           </>
