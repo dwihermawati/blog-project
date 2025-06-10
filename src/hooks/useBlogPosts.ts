@@ -20,7 +20,7 @@ const useBlogPosts = (params: UseBlogPostsParams = {}) => {
     userId,
     sortBy,
     enabled = true,
-    queryKeyPrefix = ['blogPosts']
+    queryKeyPrefix = ['blogPosts'],
   } = params;
 
   return useQuery<BlogListResponse, Error>({

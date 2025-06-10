@@ -142,8 +142,7 @@ const Navbar: React.FC = () => {
                       <AvatarDisplay
                         avatarUrl={displayAvatarUrl}
                         displayName={displayUserName}
-                        sizeClass='size-10'
-                        className='group-hover:scale-105 group-hover:brightness-110'
+                        className='size-10 group-hover:scale-105 group-hover:brightness-110'
                       />
                     )}
                     <span className='text-sm-medium group-hover:text-primary-300 text-neutral-900 max-lg:hidden'>

@@ -6,7 +6,7 @@ import { UserProfileResponse } from '@/types/user';
 const userService = {
   getUserByEmail: async (
     email: string,
-    token: string
+    token?: string
   ): Promise<UserProfileResponse> => {
     try {
       const response = await apiClient.get<UserProfileResponse>(

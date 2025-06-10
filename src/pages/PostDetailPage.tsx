@@ -79,17 +79,19 @@ const PostDetailPage: React.FC = () => {
               ))}
             </div>
             <div className='flex items-center gap-3'>
-              <div className='group flex-start flex-shrink-0 cursor-pointer gap-2'>
+              <Link
+                to={`/profile/${post.author.email}`}
+                className='group flex-start flex-shrink-0 cursor-pointer gap-2'
+              >
                 <AvatarDisplay
                   avatarUrl={post.author.avatarUrl}
                   displayName={post.author.name}
-                  sizeClass='size-10'
-                  className='group-hover:scale-105 group-hover:brightness-110'
+                  className='size-10 group-hover:scale-105 group-hover:brightness-110'
                 />
                 <span className='md:text-sm-medium text-xs-regular group-hover:text-primary-300 text-neutral-900'>
                   {capitalizeName(post.author.name)}
                 </span>
-              </div>
+              </Link>
               <div className='size-1 flex-shrink-0 rounded-full bg-neutral-400' />
               <span className='md:text-sm-regular text-xs-regular text-neutral-600'>
                 {formatDateTime(post.createdAt, false)}
@@ -139,8 +141,7 @@ const PostDetailPage: React.FC = () => {
                       <AvatarDisplay
                         avatarUrl={currentUserAvatarUrl}
                         displayName={currentUserDisplayName}
-                        sizeClass='size-10'
-                        className='group-hover:scale-105 group-hover:brightness-110'
+                        className='size-10 group-hover:scale-105 group-hover:brightness-110'
                       />
                     )}
                     <span className='text-sm-medium group-hover:text-primary-300 text-neutral-900 max-lg:hidden'>

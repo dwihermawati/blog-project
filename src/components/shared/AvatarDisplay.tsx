@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useLayoutEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import getColorAvatar from '@/lib/getColorAvatar';
 import getInitials from '@/lib/getInitials';
@@ -6,7 +6,6 @@ import getInitials from '@/lib/getInitials';
 interface AvatarDisplayProps {
   avatarUrl?: string | null;
   displayName: string;
-  sizeClass?: string;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -14,7 +13,6 @@ interface AvatarDisplayProps {
 const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
   avatarUrl,
   displayName,
-  sizeClass = 'size-10',
   className,
   style,
 }) => {
@@ -22,11 +20,31 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
   const initial = getInitials(displayName);
   const bgColor = getColorAvatar(displayName);
 
+  const avatarRef = useRef<HTMLDivElement>(null);
+  const [avatarSize, setAvatarSize] = useState(0);
+
+  useLayoutEffect(() => {
+    const measureAvatarSize = () => {
+      if (avatarRef.current) {
+        const size = avatarRef.current.getBoundingClientRect().width;
+        setAvatarSize(size);
+      }
+    };
+    measureAvatarSize();
+
+    window.addEventListener('resize', measureAvatarSize);
+
+    return () => {
+      window.removeEventListener('resize', measureAvatarSize);
+    };
+  }, [className, style]);
+  const fontSizeCalc = avatarSize > 0 ? `${avatarSize * 0.4}px` : '1rem';
+
   return (
     <div
+      ref={avatarRef}
       className={cn(
-        'flex-center flex-shrink-0 overflow-hidden rounded-full object-contain',
-        sizeClass,
+        'flex-center aspect-square flex-shrink-0 overflow-hidden rounded-full object-contain',
         className
       )}
       style={style}
@@ -39,8 +57,12 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
         />
       ) : (
         <div
-          className='flex-center size-full text-sm font-semibold text-white uppercase'
-          style={{ backgroundColor: bgColor }}
+          className='flex-center size-full font-semibold text-white uppercase'
+          style={{
+            backgroundColor: bgColor,
+            fontSize: fontSizeCalc,
+            lineHeight: 1,
+          }}
         >
           {initial}
         </div>
