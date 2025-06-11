@@ -134,7 +134,10 @@ const PostDetailPage: React.FC = () => {
               </p>
               {isAuthenticated ? (
                 <div className='flex flex-col gap-3'>
-                  <div className='group flex cursor-pointer items-center gap-3'>
+                  <Link
+                    to='/profile'
+                    className='group flex cursor-pointer items-center gap-3'
+                  >
                     {isUserLoading ? (
                       <div className='flex-center size-10 animate-pulse rounded-full bg-gray-200'></div>
                     ) : (
@@ -149,7 +152,7 @@ const PostDetailPage: React.FC = () => {
                         ? 'Loading...'
                         : capitalizeName(currentUserDisplayName)}
                     </span>
-                  </div>
+                  </Link>
                   <Label>Give your Comments</Label>
                   <Textarea
                     className='h-35 resize-none rounded-xl border border-neutral-300 px-4 py-2'

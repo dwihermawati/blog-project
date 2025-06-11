@@ -4,14 +4,23 @@ import AvatarDisplay from '@/components/shared/AvatarDisplay';
 import { generateClamp } from '@/function/generate-clamp';
 import useUser from '@/hooks/useUser';
 import capitalizeName from '@/lib/capitalizeName';
-import React from 'react';
+import React, { useState } from 'react';
 import { BeatLoader } from 'react-spinners';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { PenLine } from 'lucide-react';
+import { PenLine, XIcon } from 'lucide-react';
 import BlogList from '@/components/blog/BlogList';
 import ChangePasswordForm from '@/components/profile/ChangePasswordForm';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import EditProfileForm from '@/components/profile/EditProfileForm';
+import { DialogClose } from '@radix-ui/react-dialog';
 
 const ProfilePage: React.FC = () => {
   const {
@@ -20,6 +29,9 @@ const ProfilePage: React.FC = () => {
     isError: isProfileError,
     error: profileError,
   } = useUser();
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   return (
     <>
       <Navbar />
@@ -69,9 +81,28 @@ const ProfilePage: React.FC = () => {
                   )}
                 </div>
               </div>
-              <p className='text-xs-semibold md:text-md-semibold text-primary-300 origin-left transform cursor-pointer underline underline-offset-3 hover:scale-101'>
-                Edit Profile
-              </p>
+              <Dialog
+                open={isEditDialogOpen}
+                onOpenChange={setIsEditDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <p className='text-xs-semibold md:text-md-semibold text-primary-300 origin-left transform cursor-pointer underline underline-offset-3 hover:scale-101'>
+                    Edit Profile
+                  </p>
+                </DialogTrigger>
+                <DialogContent className='max-w-112.75'>
+                  <DialogHeader>
+                    <DialogTitle>Edit Profile</DialogTitle>
+                    <DialogClose>
+                      <XIcon className='size-6' />
+                    </DialogClose>
+                  </DialogHeader>
+                  <EditProfileForm
+                    currentUserProfile={userProfile}
+                    onUpdateSuccess={() => setIsEditDialogOpen(false)}
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
             <Tabs defaultValue='yourpost'>
               <TabsList className='w-full md:w-88.5'>

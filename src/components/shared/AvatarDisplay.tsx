@@ -8,6 +8,7 @@ interface AvatarDisplayProps {
   displayName: string;
   className?: string;
   style?: React.CSSProperties;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
@@ -15,6 +16,7 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
   displayName,
   className,
   style,
+  onClick,
 }) => {
   const hasAvatar = !!avatarUrl;
   const initial = getInitials(displayName);
@@ -48,6 +50,7 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
         className
       )}
       style={style}
+      onClick={onClick}
     >
       {hasAvatar ? (
         <img

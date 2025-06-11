@@ -16,3 +16,9 @@ export interface ChangePasswordPayload {
 export interface ChangePasswordSuccessResponse {
   message: string;
 }
+
+export interface UpdateProfilePayload {
+  name?: string;
+  headline?: string | null;
+  avatar?: File;
+}
