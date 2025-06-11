@@ -24,3 +24,7 @@ export interface BlogListResponse {
   page: number;
   lastPage: number;
 }
+
+export interface DeletePostSuccessResponse {
+  success: boolean;
+}

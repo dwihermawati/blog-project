@@ -1,6 +1,10 @@
 import axios from 'axios';
 import apiClient from '@/lib/api';
-import { BlogListResponse, BlogPost } from '@/types/blog';
+import {
+  BlogListResponse,
+  BlogPost,
+  DeletePostSuccessResponse,
+} from '@/types/blog';
 import { ApiErrorResponse } from '@/types/auth';
 
 interface GetPostsParams {
@@ -54,6 +58,31 @@ const blogService = {
         const apiError: ApiErrorResponse = error.response.data;
         throw new Error(
           apiError.message || `Failed to fetch post details with ID: ${id}.`
+        );
+      } else {
+        throw new Error(error.message || 'Failed to connect to server.');
+      }
+    }
+  },
+  deletePost: async (
+    postId: number,
+    token: string
+  ): Promise<DeletePostSuccessResponse> => {
+    try {
+      const response = await apiClient.delete<DeletePostSuccessResponse>(
+        `/posts/${postId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        const apiError: ApiErrorResponse = error.response.data;
+        throw new Error(
+          apiError.message || `Failed to delete post with ID: ${postId}.`
         );
       } else {
         throw new Error(error.message || 'Failed to connect to server.');

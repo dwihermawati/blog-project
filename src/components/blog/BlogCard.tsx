@@ -3,12 +3,26 @@ import capitalizeName from '@/lib/capitalizeName';
 import { formatDateTime } from '@/lib/formatDateTime';
 import { cn } from '@/lib/utils';
 import { BlogPost } from '@/types/blog';
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ThumbsUp } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ThumbsUp, XIcon } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import AvatarDisplay from '../shared/AvatarDisplay';
 import DOMPurify from 'dompurify';
+import useDeletePost from '@/hooks/useDeletePost';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { BeatLoader } from 'react-spinners';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -28,6 +42,27 @@ const BlogCard: React.FC<BlogCardProps> = ({
       FORBID_ATTR: ['onerror', 'onload', 'onclick'],
     });
     return { __html: cleanHtml };
+  };
+
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { mutate: deletePost, isPending: isDeleting } = useDeletePost({
+    onSuccess: () => {
+      alert('Post successfully deleted!');
+      // navigate('/profile');
+    },
+    onError: (error) => {
+      alert(`Failed to delete post: ${error.message}`);
+    },
+  });
+
+  const handleConfirmDelete = () => {
+    if (!isAuthenticated) {
+      alert('You must be logged in to delete a post.');
+      navigate('/login');
+      return;
+    }
+    deletePost(post.id);
   };
 
   return (
@@ -109,9 +144,41 @@ const BlogCard: React.FC<BlogCardProps> = ({
                   Edit
                 </Link>
                 <div className='h-6 w-[1px] flex-shrink-0 bg-neutral-300' />
-                <span className='text-sm-semibold cursor-pointer text-[#EE1D52] underline underline-offset-3 hover:scale-105'>
-                  Delete
-                </span>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <span className='text-sm-semibold cursor-pointer text-[#EE1D52] underline underline-offset-3 hover:scale-105'>
+                      Delete
+                    </span>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete</AlertDialogTitle>
+                      <AlertDialogCancel>
+                        <XIcon className='size-6 hover:text-neutral-400' />
+                      </AlertDialogCancel>
+                    </AlertDialogHeader>
+                    <AlertDialogDescription>
+                      Are you sure to delete?
+                    </AlertDialogDescription>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>
+                        <div className='text-sm-semibold w-30 text-center text-neutral-950 max-sm:w-20'>
+                          Cancel
+                        </div>
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deletePost(post.id)}
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? (
+                          <BeatLoader size={10} color='#fff' />
+                        ) : (
+                          'Delete'
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </>
           )}

@@ -56,7 +56,7 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
         <img
           src={avatarUrl as string}
           alt={displayName}
-          className='size-full rounded-full object-cover'
+          className='size-full rounded-full border border-neutral-300 object-cover'
         />
       ) : (
         <div
