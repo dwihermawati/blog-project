@@ -14,13 +14,15 @@ import { formatDateTime } from '@/lib/formatDateTime';
 import { Icon } from '@iconify/react';
 import { ThumbsUp } from 'lucide-react';
 import React from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { BeatLoader } from 'react-spinners';
 import DOMPurify from 'dompurify';
+import useLikePost from '@/hooks/useLikePost';
 
 const PostDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const postId = id ? parseInt(id) : undefined;
+  const navigate = useNavigate();
 
   const {
     data: post,
@@ -45,6 +47,26 @@ const PostDetailPage: React.FC = () => {
       FORBID_ATTR: ['onerror', 'onload', 'onclick'],
     });
     return { __html: cleanHtml };
+  };
+
+  const { mutate: likePost, isPending: isLikingPost } = useLikePost({
+    onSuccess: () => {
+      console.log('Post liked successfully!');
+    },
+    onError: (err) => {
+      alert(`Failed to give like: ${err.message}`);
+    },
+  });
+
+  const handleLikeClick = () => {
+    if (!isAuthenticated) {
+      alert('You must be logged in to give a like!');
+      navigate('/login');
+      return;
+    }
+    if (postId) {
+      likePost(postId);
+    }
   };
 
   return (
@@ -99,8 +121,19 @@ const PostDetailPage: React.FC = () => {
             </div>
             <div className='h-[1px] w-full bg-neutral-300' />
             <div className='flex items-center gap-3 md:gap-5'>
-              <div className='group flex cursor-pointer items-center gap-1.5'>
-                <ThumbsUp className='group-hover:text-primary-300 size-5 text-neutral-600 group-hover:scale-105' />
+              <div
+                className='group flex cursor-pointer items-center gap-1.5'
+                onClick={handleLikeClick}
+              >
+                {isLikingPost ? (
+                  <Icon
+                    icon='mdi:like'
+                    className='fill-primary-300 size-5 group-hover:scale-105'
+                  />
+                ) : (
+                  <ThumbsUp className='group-hover:text-primary-300 size-5 text-neutral-600 group-hover:scale-105' />
+                )}
+
                 <span className='md:text-sm-regular text-xs-regular group-hover:text-primary-300 text-neutral-600'>
                   {post.likes}
                 </span>
@@ -184,6 +217,7 @@ const PostDetailPage: React.FC = () => {
                 itemsPerPage={1}
                 showTitle={false}
                 showPagination={false}
+                sortBy='most-liked'
               />
             </div>
           </>

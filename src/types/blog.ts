@@ -28,3 +28,13 @@ export interface BlogListResponse {
 export interface DeletePostSuccessResponse {
   success: boolean;
 }
+
+export interface LikedByUser {
+  id: number;
+  name: string;
+  email: string;
+  headline: string | null;
+  avatarUrl: string | null;
+}
+
+export type PostLikesResponse = LikedByUser[];

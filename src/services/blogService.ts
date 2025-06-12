@@ -4,6 +4,7 @@ import {
   BlogListResponse,
   BlogPost,
   DeletePostSuccessResponse,
+  PostLikesResponse,
 } from '@/types/blog';
 import { ApiErrorResponse } from '@/types/auth';
 
@@ -83,6 +84,48 @@ const blogService = {
         const apiError: ApiErrorResponse = error.response.data;
         throw new Error(
           apiError.message || `Failed to delete post with ID: ${postId}.`
+        );
+      } else {
+        throw new Error(error.message || 'Failed to connect to server.');
+      }
+    }
+  },
+  getPostLikes: async (postId: number): Promise<PostLikesResponse> => {
+    try {
+      const response = await apiClient.get<PostLikesResponse>(
+        `/posts/${postId}/likes`
+      );
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        const apiError: ApiErrorResponse = error.response.data;
+        throw new Error(
+          apiError.message ||
+            `Failed to fetch likes list for post ID: ${postId}.`
+        );
+      } else {
+        throw new Error(error.message || 'Failed to connect to server.');
+      }
+    }
+  },
+
+  likePost: async (postId: number, token: string): Promise<BlogPost> => {
+    try {
+      const response = await apiClient.post<BlogPost>(
+        `/posts/${postId}/like`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        const apiError: ApiErrorResponse = error.response.data;
+        throw new Error(
+          apiError.message || `Failed to like post ID: ${postId}.`
         );
       } else {
         throw new Error(error.message || 'Failed to connect to server.');
