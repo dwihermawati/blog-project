@@ -14,7 +14,7 @@ interface UserInfo {
   email: string;
   name: string;
   id: number;
-  avatarURL?: string | null;
+  avatarUrl?: string | null;
   headline?: string | null;
 }
 
@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     const storedUserEmail = localStorage.getItem('userEmail');
     const storedUserName = localStorage.getItem('userName');
     const storedUserId = localStorage.getItem('userId');
-    const storedAvatarURL = localStorage.getItem('userAvatarURL');
+    const storedAvatarUrl = localStorage.getItem('userAvatarUrl');
 
     if (storedToken && storedUserEmail && storedUserId && storedUserName) {
       setToken(storedToken);
@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         id: parseInt(storedUserId),
         email: storedUserEmail,
         name: storedUserName,
-        avatarURL: storedAvatarURL || null,
+        avatarUrl: storedAvatarUrl || null,
       });
       queryClient.invalidateQueries({ queryKey: ['user', storedUserEmail] });
     }
@@ -75,14 +75,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     if (userDataFromApi) {
       localStorage.setItem('userName', userDataFromApi.name);
       localStorage.setItem('userId', userDataFromApi.id.toString());
-      if (userDataFromApi.avatarURL)
-        localStorage.setItem('userAvatarURL', userDataFromApi.avatarURL);
+      if (userDataFromApi.avatarUrl)
+        localStorage.setItem('userAvatarUrl', userDataFromApi.avatarUrl);
 
       setUser({
         id: userDataFromApi.id,
         email: userDataFromApi.email,
         name: userDataFromApi.name,
-        avatarURL: userDataFromApi.avatarURL,
+        avatarUrl: userDataFromApi.avatarUrl,
       });
     } else {
       setUser({
@@ -101,7 +101,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userName');
     localStorage.removeItem('userId');
-    localStorage.removeItem('userAvatarURL');
+    localStorage.removeItem('userAvatarUrl');
 
     queryClient.clear();
     navigate('/');

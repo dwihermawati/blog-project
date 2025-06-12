@@ -3,14 +3,13 @@ import capitalizeName from '@/lib/capitalizeName';
 import { formatDateTime } from '@/lib/formatDateTime';
 import { cn } from '@/lib/utils';
 import { BlogPost } from '@/types/blog';
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ThumbsUp, XIcon } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import AvatarDisplay from '../shared/AvatarDisplay';
 import DOMPurify from 'dompurify';
 import useDeletePost from '@/hooks/useDeletePost';
-import { useAuth } from '@/contexts/AuthContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +22,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { BeatLoader } from 'react-spinners';
+import { useAuth } from '@/contexts/AuthContext';
+import useLikePost from '@/hooks/useLikePost';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -44,25 +45,35 @@ const BlogCard: React.FC<BlogCardProps> = ({
     return { __html: cleanHtml };
   };
 
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
   const { mutate: deletePost, isPending: isDeleting } = useDeletePost({
     onSuccess: () => {
       alert('Post successfully deleted!');
-      // navigate('/profile');
     },
     onError: (error) => {
       alert(`Failed to delete post: ${error.message}`);
     },
   });
 
-  const handleConfirmDelete = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { mutate: likePost, isPending: isLikingPost } = useLikePost({
+    onSuccess: () => {
+      console.log('Post liked successfully!');
+    },
+    onError: (err) => {
+      alert(`Failed to give like: ${err.message}`);
+    },
+  });
+
+  const handleLikeClick = () => {
     if (!isAuthenticated) {
-      alert('You must be logged in to delete a post.');
+      alert('You must be logged in to give a like!');
       navigate('/login');
       return;
     }
-    deletePost(post.id);
+    if (post) {
+      likePost(post.id);
+    }
   };
 
   return (
@@ -208,7 +219,18 @@ const BlogCard: React.FC<BlogCardProps> = ({
         {(variant === 'blogpost' || variant === 'most-liked') && (
           <div className='flex items-center gap-3 md:gap-5'>
             <div className='group flex cursor-pointer items-center gap-1.5'>
-              <ThumbsUp className='group-hover:text-primary-300 size-5 text-neutral-600 group-hover:scale-105' />
+              {isLikingPost ? (
+                <Icon
+                  icon='mdi:like'
+                  className='text-primary-300 size-5 scale-105'
+                  onClick={handleLikeClick}
+                />
+              ) : (
+                <ThumbsUp
+                  className='hover:text-primary-300 size-5 text-neutral-600 hover:scale-105'
+                  onClick={handleLikeClick}
+                />
+              )}
               <span className='md:text-sm-regular text-xs-regular group-hover:text-primary-300 text-neutral-600'>
                 {post.likes}
               </span>
