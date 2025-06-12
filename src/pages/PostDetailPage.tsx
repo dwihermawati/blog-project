@@ -13,11 +13,22 @@ import capitalizeName from '@/lib/capitalizeName';
 import { formatDateTime } from '@/lib/formatDateTime';
 import { Icon } from '@iconify/react';
 import { ThumbsUp } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { BeatLoader } from 'react-spinners';
 import DOMPurify from 'dompurify';
 import useLikePost from '@/hooks/useLikePost';
+import { z } from 'zod';
+import useComments from '@/hooks/useComments';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import useCreateComment from '@/hooks/useCreateComment';
+import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import CommentCard from '@/components/blog/CommentCard';
+
+const commentSchema = z.object({
+  content: z.string().min(3, 'Comments cannot be empty.'),
+});
 
 const PostDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,7 +45,7 @@ const PostDetailPage: React.FC = () => {
     enabled: !!postId,
   });
 
-  const { isAuthenticated, user: authUser } = useAuth();
+  const { isAuthenticated, user: authUser, token } = useAuth();
   const { data: userData, isLoading: isUserLoading } = useUser();
 
   const currentUserAvatarUrl = userData?.avatarUrl;
@@ -49,15 +60,7 @@ const PostDetailPage: React.FC = () => {
     return { __html: cleanHtml };
   };
 
-  const { mutate: likePost, isPending: isLikingPost } = useLikePost({
-    onSuccess: () => {
-      console.log('Post liked successfully!');
-    },
-    onError: (err) => {
-      alert(`Failed to give like: ${err.message}`);
-    },
-  });
-
+  const likePost = useLikePost();
   const handleLikeClick = () => {
     if (!isAuthenticated) {
       alert('You must be logged in to give a like!');
@@ -65,8 +68,42 @@ const PostDetailPage: React.FC = () => {
       return;
     }
     if (postId) {
-      likePost(postId);
+      likePost.mutate(postId);
     }
+  };
+
+  const [isCommentsDialogOpen, setIsCommentsDialogOpen] = useState(false);
+  const {
+    data: commentsData,
+    isLoading: isCommentsLoading,
+    isError: isCommentsError,
+    error: commentsError,
+  } = useComments({ postId: post?.id as number, enabled: !!post?.id });
+
+  const form = useForm<z.infer<typeof commentSchema>>({
+    resolver: zodResolver(commentSchema),
+    defaultValues: { content: '' },
+  });
+
+  const { mutate: createComment, isPending: isCreatingComment } =
+    useCreateComment({
+      onSuccess: () => {
+        form.reset();
+        alert('Comment submitted successfully!');
+      },
+      onError: (err) => {
+        alert(`Failed to post comment:
+ ${err.message}`);
+      },
+    });
+
+  const handleCommentSubmit = (data: z.infer<typeof commentSchema>) => {
+    if (!isAuthenticated || !token) {
+      alert('You must be logged in to post a comment.');
+      navigate('/login');
+      return;
+    }
+    createComment({ postId: post!.id, content: data.content });
   };
 
   return (
@@ -125,7 +162,7 @@ const PostDetailPage: React.FC = () => {
                 className='group flex cursor-pointer items-center gap-1.5'
                 onClick={handleLikeClick}
               >
-                {isLikingPost ? (
+                {post?.likedByUser ? (
                   <Icon
                     icon='mdi:like'
                     className='fill-primary-300 size-5 group-hover:scale-105'
@@ -144,7 +181,7 @@ const PostDetailPage: React.FC = () => {
                   className='group-hover:text-primary-300 size-5 text-neutral-600 group-hover:scale-105'
                 />
                 <span className='md:text-sm-regular text-xs-regular group-hover:text-primary-300 text-neutral-600'>
-                  {post.comments}
+                  {commentsData?.length}
                 </span>
               </div>
             </div>
@@ -163,36 +200,63 @@ const PostDetailPage: React.FC = () => {
             <div className='h-[1px] w-full bg-neutral-300' />
             <div className='flex flex-col gap-3'>
               <p className='md:display-xs-bold text-xl-bold text-neutral-900'>
-                Comments(count comments)
+                Comments({commentsData?.length})
               </p>
               {isAuthenticated ? (
-                <div className='flex flex-col gap-3'>
-                  <Link
-                    to='/profile'
-                    className='group flex cursor-pointer items-center gap-3'
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(handleCommentSubmit)}
+                    className='flex flex-col gap-3'
                   >
-                    {isUserLoading ? (
-                      <div className='flex-center size-10 animate-pulse rounded-full bg-gray-200'></div>
-                    ) : (
-                      <AvatarDisplay
-                        avatarUrl={currentUserAvatarUrl}
-                        displayName={currentUserDisplayName}
-                        className='size-10 group-hover:scale-105 group-hover:brightness-110'
-                      />
-                    )}
-                    <span className='text-sm-medium group-hover:text-primary-300 text-neutral-900 max-lg:hidden'>
-                      {isUserLoading
-                        ? 'Loading...'
-                        : capitalizeName(currentUserDisplayName)}
-                    </span>
-                  </Link>
-                  <Label>Give your Comments</Label>
-                  <Textarea
-                    className='h-35 resize-none rounded-xl border border-neutral-300 px-4 py-2'
-                    placeholder='Enter your comment'
-                  />
-                  <Button className='w-full self-end md:w-51'>Send</Button>
-                </div>
+                    <Link
+                      to='/profile'
+                      className='group flex cursor-pointer items-center gap-3'
+                    >
+                      {isUserLoading ? (
+                        <div className='flex-center size-10 animate-pulse rounded-full bg-gray-200'></div>
+                      ) : (
+                        <AvatarDisplay
+                          avatarUrl={currentUserAvatarUrl}
+                          displayName={currentUserDisplayName}
+                          className='size-10 group-hover:scale-105 group-hover:brightness-110'
+                        />
+                      )}
+                      <span className='text-sm-medium group-hover:text-primary-300 text-neutral-900'>
+                        {isUserLoading
+                          ? 'Loading...'
+                          : capitalizeName(currentUserDisplayName)}
+                      </span>
+                    </Link>
+                    <FormField
+                      control={form.control}
+                      name='content'
+                      render={({ field, fieldState }) => (
+                        <FormItem>
+                          <Label>Give your Comments</Label>
+                          <Textarea
+                            className='h-35 resize-none rounded-xl border border-neutral-300 px-4 py-2'
+                            placeholder='Enter your comment'
+                            disabled={isCreatingComment}
+                            {...field}
+                            aria-invalid={!!fieldState.error}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type='submit'
+                      className='w-full self-end md:w-51'
+                      disabled={isCreatingComment}
+                    >
+                      {isCreatingComment ? (
+                        <BeatLoader size={8} color='#fff' />
+                      ) : (
+                        'Send'
+                      )}
+                    </Button>
+                  </form>
+                </Form>
               ) : (
                 <div className='text-sm-regular flex items-center gap-2 text-neutral-600'>
                   <span>Login to leave a comment.</span>
@@ -205,10 +269,31 @@ const PostDetailPage: React.FC = () => {
                 </div>
               )}
               <div className='h-[1px] w-full bg-neutral-300' />
-              <div>card comment in here</div>
-              <p className='text-sm-semibold text-primary-300 origin-left transform cursor-pointer underline underline-offset-3 hover:scale-101'>
-                See All Comments
-              </p>
+              {isCommentsLoading ? (
+                <div className='text-center'>Loading comments...</div>
+              ) : isCommentsError ? (
+                <div className='text-center text-[#EE1D52]'>
+                  Error loading comments: {commentsError?.message}
+                </div>
+              ) : commentsData && commentsData.length > 0 ? (
+                <div className='flex flex-col gap-4'>
+                  {commentsData.slice(0, 3).map((comment) => (
+                    <CommentCard key={comment.id} comment={comment} />
+                  ))}
+                </div>
+              ) : (
+                <p className='text-muted-foreground text-center'>
+                  No comments yet.
+                </p>
+              )}
+              {commentsData && commentsData.length > 3 && (
+                <p
+                  className='text-sm-semibold text-primary-300 origin-left transform cursor-pointer underline underline-offset-3 hover:scale-101'
+                  onClick={() => setIsCommentsDialogOpen(true)}
+                >
+                  See All Comments
+                </p>
+              )}
               <div className='h-[1px] w-full bg-neutral-300' />
               <h2 className='md:display-xs-bold text-xl-bold text-neutral-900'>
                 Another Post

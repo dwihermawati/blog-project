@@ -3,7 +3,10 @@ import apiClient from '@/lib/api';
 import {
   BlogListResponse,
   BlogPost,
+  CreateCommentPayload,
+  CreateCommentSuccessResponse,
   DeletePostSuccessResponse,
+  PostCommentsResponse,
   PostLikesResponse,
 } from '@/types/blog';
 import { ApiErrorResponse } from '@/types/auth';
@@ -90,6 +93,7 @@ const blogService = {
       }
     }
   },
+
   getPostLikes: async (postId: number): Promise<PostLikesResponse> => {
     try {
       const response = await apiClient.get<PostLikesResponse>(
@@ -108,7 +112,6 @@ const blogService = {
       }
     }
   },
-
   likePost: async (postId: number, token: string): Promise<BlogPost> => {
     try {
       const response = await apiClient.post<BlogPost>(
@@ -127,6 +130,52 @@ const blogService = {
         throw new Error(
           apiError.message || `Failed to like post ID: ${postId}.`
         );
+      } else {
+        throw new Error(error.message || 'Failed to connect to server.');
+      }
+    }
+  },
+
+  getCommentsByPostId: async (
+    postId: number
+  ): Promise<PostCommentsResponse> => {
+    try {
+      const response = await apiClient.get<PostCommentsResponse>(
+        `/posts/${postId}/comments`
+      );
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        const apiError: ApiErrorResponse = error.response.data;
+        throw new Error(
+          apiError.message || `Failed to fetch comments for post ID: ${postId}.`
+        );
+      } else {
+        throw new Error(error.message || 'Failed to connect to server.');
+      }
+    }
+  },
+
+  createComment: async (
+    postId: number,
+    payload: CreateCommentPayload,
+    token: string
+  ): Promise<CreateCommentSuccessResponse> => {
+    try {
+      const response = await apiClient.post<CreateCommentSuccessResponse>(
+        `/comments/${postId}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        const apiError: ApiErrorResponse = error.response.data;
+        throw new Error(apiError.message || 'Failed to post comment.');
       } else {
         throw new Error(error.message || 'Failed to connect to server.');
       }

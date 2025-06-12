@@ -9,7 +9,7 @@ interface UseLikePostOptions {
 }
 
 interface LikePostContext {
-  previousPostDetail?: BlogPost | undefined;
+  previousPostDetail?: BlogPost;
   previousBlogLists?: Array<[QueryKey, BlogListResponse | undefined]>;
 }
 
@@ -18,10 +18,11 @@ const useLikePost = (options?: UseLikePostOptions) => {
   const { token } = useAuth();
 
   return useMutation<BlogPost, Error, number, LikePostContext>({
-    mutationFn: async (postId: number) => {
+    mutationFn: async (postId) => {
       if (!token) throw new Error('You must be logged in to give a like.');
       return blogService.likePost(postId, token);
     },
+
     onMutate: async (postIdToLike) => {
       await queryClient.cancelQueries({
         queryKey: ['postDetail', postIdToLike],
@@ -36,51 +37,63 @@ const useLikePost = (options?: UseLikePostOptions) => {
         queryKey: ['blogPosts'],
       });
 
-      queryClient.setQueryData<BlogPost | undefined>(
-        ['postDetail', postIdToLike],
-        (old) => {
-          if (old) {
-            return { ...old, likes: old.likes + 1 };
-          }
-          return old;
-        }
-      );
+      const wasLiked = previousPostDetail?.likedByUser ?? false;
 
-      queryClient.setQueriesData<BlogListResponse | undefined>(
-        { queryKey: ['blogPosts'] },
-        (oldQueryData) => {
-          if (oldQueryData) {
-            const updatedData = oldQueryData.data.map((post) =>
-              post.id === postIdToLike
-                ? { ...post, likes: post.likes + 1 }
-                : post
-            );
-            return { ...oldQueryData, data: updatedData };
-          }
-          return undefined;
-        }
-      );
-
-      return { previousPostDetail, previousBlogLists };
-    },
-    onError: (err, postIdToLike, context) => {
-      queryClient.setQueryData(
-        ['postDetail', postIdToLike],
-        context?.previousPostDetail
-      );
-      if (context?.previousBlogLists) {
-        context.previousBlogLists.forEach(([key, data]) => {
-          queryClient.setQueryData(key, data);
+      // Optimistically update post detail
+      if (previousPostDetail) {
+        queryClient.setQueryData<BlogPost>(['postDetail', postIdToLike], {
+          ...previousPostDetail,
+          likes: previousPostDetail.likes + (wasLiked ? -1 : 1),
+          likedByUser: !wasLiked,
         });
       }
-      options?.onError?.(err);
+
+      // Optimistically update blog posts list
+      queryClient.setQueriesData<BlogListResponse>(
+        { queryKey: ['blogPosts'] },
+        (oldQuery) => {
+          if (!oldQuery) return oldQuery;
+          const updatedData = oldQuery.data.map((post) =>
+            post.id === postIdToLike
+              ? {
+                  ...post,
+                  likes: post.likes + (wasLiked ? -1 : 1),
+                  likedByUser: !wasLiked,
+                }
+              : post
+          );
+          return { ...oldQuery, data: updatedData };
+        }
+      );
+
+      return {
+        previousPostDetail,
+        previousBlogLists,
+      };
     },
-    onSettled: (data, error, postIdToLike) => {
+
+    onError: (error, postIdToLike, context) => {
+      // Rollback post detail
+      if (context?.previousPostDetail) {
+        queryClient.setQueryData(
+          ['postDetail', postIdToLike],
+          context.previousPostDetail
+        );
+      }
+
+      // Rollback all blog lists
+      context?.previousBlogLists?.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
+      });
+
+      options?.onError?.(error);
+    },
+
+    onSettled: (_data, error, postIdToLike) => {
       queryClient.invalidateQueries({ queryKey: ['postDetail', postIdToLike] });
       queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
-      if (!error) {
-        options?.onSuccess?.();
-      }
+
+      if (!error) options?.onSuccess?.();
     },
   });
 };

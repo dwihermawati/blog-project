@@ -56,7 +56,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
 
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const { mutate: likePost, isPending: isLikingPost } = useLikePost({
+  const { mutate: likePost } = useLikePost({
     onSuccess: () => {
       console.log('Post liked successfully!');
     },
@@ -219,7 +219,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
         {(variant === 'blogpost' || variant === 'most-liked') && (
           <div className='flex items-center gap-3 md:gap-5'>
             <div className='group flex cursor-pointer items-center gap-1.5'>
-              {isLikingPost ? (
+              {post?.likedByUser ? (
                 <Icon
                   icon='mdi:like'
                   className='text-primary-300 size-5 scale-105'

@@ -34,8 +34,30 @@ export interface LikedByUser {
   id: number;
   name: string;
   email: string;
-  headline: string | null;
-  avatarUrl: string | null;
+  headline?: string | null;
+  avatarUrl?: string | null;
 }
 
 export type PostLikesResponse = LikedByUser[];
+
+export interface Comment {
+  id: number;
+  content: string;
+  createdAt: string;
+  updatedAt?: string;
+  author: {
+    id: number;
+    name: string;
+    email: string;
+    headline?: string | null;
+    avatarUrl?: string | null;
+  };
+}
+
+export type PostCommentsResponse = Comment[];
+
+export interface CreateCommentPayload {
+  content: string;
+}
+
+export interface CreateCommentSuccessResponse extends Comment {}
