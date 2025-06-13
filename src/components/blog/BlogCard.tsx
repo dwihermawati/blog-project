@@ -3,7 +3,7 @@ import capitalizeName from '@/lib/capitalizeName';
 import { formatDateTime } from '@/lib/formatDateTime';
 import { cn } from '@/lib/utils';
 import { BlogPost } from '@/types/blog';
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ThumbsUp, XIcon } from 'lucide-react';
 import { Icon } from '@iconify/react';
@@ -25,6 +25,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import useLikePost from '@/hooks/useLikePost';
 import { renderSafeHTML } from '@/lib/renderSafeHTML';
 import useComments from '@/hooks/useComments';
+import StatisticDialog from './StatisticDialog';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -63,6 +64,8 @@ const BlogCard: React.FC<BlogCardProps> = ({
     postId: post?.id as number,
     enabled: !!post?.id,
   });
+
+  const [isStatisticDialogOpen, setIsStatisticDialogOpen] = useState(false);
 
   return (
     <div
@@ -132,7 +135,10 @@ const BlogCard: React.FC<BlogCardProps> = ({
                 </p>
               </div>
               <div className='flex items-center gap-3'>
-                <span className='text-sm-semibold text-primary-300 cursor-pointer underline underline-offset-3 hover:scale-105'>
+                <span
+                  className='text-sm-semibold text-primary-300 cursor-pointer underline underline-offset-3 hover:scale-105'
+                  onClick={() => setIsStatisticDialogOpen(true)}
+                >
                   Statistic
                 </span>
                 <div className='h-6 w-[1px] flex-shrink-0 bg-neutral-300' />
@@ -235,6 +241,12 @@ const BlogCard: React.FC<BlogCardProps> = ({
           </div>
         )}
       </div>
+      <StatisticDialog
+        postId={post.id}
+        isOpen={isStatisticDialogOpen}
+        onClose={() => setIsStatisticDialogOpen(false)}
+        postLikesCount={post.likes}
+      />
     </div>
   );
 };
