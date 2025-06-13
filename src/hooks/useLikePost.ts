@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 interface UseLikePostOptions {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
+  post?: BlogPost;
 }
 
 interface LikePostContext {
@@ -29,17 +30,19 @@ const useLikePost = (options?: UseLikePostOptions) => {
       });
       await queryClient.cancelQueries({ queryKey: ['blogPosts'] });
 
-      const previousPostDetail = queryClient.getQueryData<BlogPost>([
-        'postDetail',
-        postIdToLike,
-      ]);
+      // ✅ Gunakan post dari props jika ada, fallback ke query
+      const previousPostDetail =
+        options?.post?.id === postIdToLike
+          ? options.post
+          : queryClient.getQueryData<BlogPost>(['postDetail', postIdToLike]);
+
       const previousBlogLists = queryClient.getQueriesData<BlogListResponse>({
         queryKey: ['blogPosts'],
       });
 
       const wasLiked = previousPostDetail?.likedByUser ?? false;
 
-      // Optimistically update post detail
+      // ✅ Update post detail
       if (previousPostDetail) {
         queryClient.setQueryData<BlogPost>(['postDetail', postIdToLike], {
           ...previousPostDetail,
@@ -48,32 +51,30 @@ const useLikePost = (options?: UseLikePostOptions) => {
         });
       }
 
-      // Optimistically update blog posts list
+      // ✅ Update semua list blog
       queryClient.setQueriesData<BlogListResponse>(
         { queryKey: ['blogPosts'] },
         (oldQuery) => {
           if (!oldQuery) return oldQuery;
-          const updatedData = oldQuery.data.map((post) =>
-            post.id === postIdToLike
-              ? {
-                  ...post,
-                  likes: post.likes + (wasLiked ? -1 : 1),
-                  likedByUser: !wasLiked,
-                }
-              : post
-          );
-          return { ...oldQuery, data: updatedData };
+          return {
+            ...oldQuery,
+            data: oldQuery.data.map((post) =>
+              post.id === postIdToLike
+                ? {
+                    ...post,
+                    likes: post.likes + (wasLiked ? -1 : 1),
+                    likedByUser: !wasLiked,
+                  }
+                : post
+            ),
+          };
         }
       );
 
-      return {
-        previousPostDetail,
-        previousBlogLists,
-      };
+      return { previousPostDetail, previousBlogLists };
     },
 
     onError: (error, postIdToLike, context) => {
-      // Rollback post detail
       if (context?.previousPostDetail) {
         queryClient.setQueryData(
           ['postDetail', postIdToLike],
@@ -81,7 +82,6 @@ const useLikePost = (options?: UseLikePostOptions) => {
         );
       }
 
-      // Rollback all blog lists
       context?.previousBlogLists?.forEach(([key, data]) => {
         queryClient.setQueryData(key, data);
       });

@@ -8,7 +8,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ThumbsUp, XIcon } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import AvatarDisplay from '../shared/AvatarDisplay';
-import DOMPurify from 'dompurify';
 import useDeletePost from '@/hooks/useDeletePost';
 import {
   AlertDialog,
@@ -24,6 +23,8 @@ import {
 import { BeatLoader } from 'react-spinners';
 import { useAuth } from '@/contexts/AuthContext';
 import useLikePost from '@/hooks/useLikePost';
+import { renderSafeHTML } from '@/lib/renderSafeHTML';
+import useComments from '@/hooks/useComments';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -36,15 +37,6 @@ const BlogCard: React.FC<BlogCardProps> = ({
   variant = 'blogpost',
   isLastItem,
 }) => {
-  const renderSafeHTML = (htmlContent: string) => {
-    const cleanHtml = DOMPurify.sanitize(htmlContent, {
-      USE_PROFILES: { html: true },
-      FORBID_TAGS: ['script'],
-      FORBID_ATTR: ['onerror', 'onload', 'onclick'],
-    });
-    return { __html: cleanHtml };
-  };
-
   const { mutate: deletePost, isPending: isDeleting } = useDeletePost({
     onSuccess: () => {
       alert('Post successfully deleted!');
@@ -56,14 +48,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
 
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const { mutate: likePost } = useLikePost({
-    onSuccess: () => {
-      console.log('Post liked successfully!');
-    },
-    onError: (err) => {
-      alert(`Failed to give like: ${err.message}`);
-    },
-  });
+  const { mutate } = useLikePost({ post });
 
   const handleLikeClick = () => {
     if (!isAuthenticated) {
@@ -71,10 +56,13 @@ const BlogCard: React.FC<BlogCardProps> = ({
       navigate('/login');
       return;
     }
-    if (post) {
-      likePost(post.id);
-    }
+    mutate(post.id);
   };
+
+  const { data: commentsData } = useComments({
+    postId: post?.id as number,
+    enabled: !!post?.id,
+  });
 
   return (
     <div
@@ -241,7 +229,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
                 className='group-hover:text-primary-300 size-5 text-neutral-600 group-hover:scale-105'
               />
               <span className='md:text-sm-regular text-xs-regular group-hover:text-primary-300 text-neutral-600'>
-                {post.comments}
+                {commentsData?.length}
               </span>
             </div>
           </div>

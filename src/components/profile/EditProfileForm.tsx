@@ -106,16 +106,21 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
-        <div className='relative flex flex-col items-center gap-4'>
+        <div className='group relative flex flex-col items-center gap-4'>
           <AvatarDisplay
             avatarUrl={previewAvatar || currentUserProfile.avatarUrl}
             displayName={currentUserProfile.name}
-            className='relative size-20 cursor-pointer hover:scale-105 hover:brightness-110'
+            className='relative size-20 cursor-pointer group-hover:scale-105 group-hover:brightness-110'
             onClick={() =>
               document.getElementById('avatar-upload-input')?.click()
             }
           />
-          <div className='bg-primary-300 flex-center absolute top-[76.25%] left-[53.6%] size-6 rounded-full p-1'>
+          <div
+            className='bg-primary-300 flex-center absolute top-[76.25%] left-[53.6%] size-6 cursor-pointer rounded-full p-1'
+            onClick={() =>
+              document.getElementById('avatar-upload-input')?.click()
+            }
+          >
             <Icon
               icon='mage:camera-fill'
               className='text-neutral-25 size-full'

@@ -10,7 +10,7 @@ interface CommentCardProps {
 
 const CommentCard: React.FC<CommentCardProps> = ({ comment }) => {
   return (
-    <div className='flex flex-col gap-2 border-b border-neutral-300 pb-3 last:border-b-0'>
+    <div className='flex flex-col gap-2 border-b border-neutral-300 pb-3 last:border-b-0 last:pb-0'>
       <div className='flex items-center gap-2 md:gap-3'>
         <AvatarDisplay
           avatarUrl={comment.author.avatarUrl}

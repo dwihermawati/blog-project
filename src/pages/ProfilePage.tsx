@@ -18,9 +18,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from '@/components/ui/dialog';
 import EditProfileForm from '@/components/profile/EditProfileForm';
-import { DialogClose } from '@radix-ui/react-dialog';
 
 const ProfilePage: React.FC = () => {
   const {
@@ -94,7 +94,7 @@ const ProfilePage: React.FC = () => {
                   <DialogHeader>
                     <DialogTitle>Edit Profile</DialogTitle>
                     <DialogClose>
-                      <XIcon className='size-6' />
+                      <XIcon className='size-6 cursor-pointer text-neutral-950 hover:text-neutral-500' />
                     </DialogClose>
                   </DialogHeader>
                   <EditProfileForm
