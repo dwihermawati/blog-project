@@ -78,7 +78,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
       {(variant === 'blogpost' || variant === 'user-blogpost') && (
         <Link
           to={`/posts/${post.id}`}
-          className='h-64.5 w-85 cursor-pointer overflow-hidden rounded-sm border border-neutral-200 hover:scale-101 max-md:hidden'
+          className='h-64.5 w-85 shrink-0 cursor-pointer overflow-hidden rounded-sm border border-neutral-200 hover:scale-101 max-md:hidden'
         >
           <img
             src={post.imageUrl}
@@ -97,7 +97,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
           <Link to={`/posts/${post.id}`}>
             <h2
               className={cn(
-                'hover:text-primary-300 cursor-pointer text-neutral-900',
+                'hover:text-primary-300 cursor-pointer break-words text-neutral-900',
                 variant === 'most-liked'
                   ? 'text-md-bold'
                   : 'text-md-bold md:text-xl-bold'
@@ -119,7 +119,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
             </div>
           )}
           <p
-            className='text-xs-regular md:text-sm-regular line-clamp-2 text-neutral-900'
+            className='text-xs-regular md:text-sm-regular line-clamp-2 break-words text-neutral-900'
             dangerouslySetInnerHTML={renderSafeHTML(post.content)}
           />
           {variant === 'user-blogpost' && (

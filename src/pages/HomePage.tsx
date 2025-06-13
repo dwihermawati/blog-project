@@ -16,7 +16,7 @@ const HomePage: React.FC = () => {
           gap: generateClamp(24, 48, 1248),
         }}
       >
-        <div className='flex w-full flex-col gap-4 max-lg:border-b-[6px] max-lg:border-b-neutral-300 max-lg:pb-6 lg:gap-6 lg:border-r lg:border-r-neutral-300 lg:pr-12'>
+        <div className='flex w-full flex-col gap-4 overflow-hidden max-lg:border-b-[6px] max-lg:border-b-neutral-300 max-lg:pb-6 lg:gap-6 lg:border-r lg:border-r-neutral-300 lg:pr-12'>
           <BlogList
             sortBy='recommended'
             showTitle={true}

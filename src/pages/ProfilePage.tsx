@@ -36,7 +36,7 @@ const ProfilePage: React.FC = () => {
     <>
       <Navbar />
       <main
-        className='custom-container flex max-w-200 flex-col gap-4 md:gap-5'
+        className='custom-container flex max-w-200 flex-col gap-4 overflow-hidden md:gap-5'
         style={{
           marginBlockStart: generateClamp(88, 128, 1248),
           marginBlockEnd: generateClamp(24, 156, 1248),

@@ -61,3 +61,10 @@ export interface CreateCommentPayload {
 }
 
 export interface CreateCommentSuccessResponse extends Comment {}
+
+export interface CreatePostPayload {
+  title: string;
+  content: string;
+  tags: string[];
+  image: File;
+}

@@ -5,6 +5,7 @@ import {
   BlogPost,
   CreateCommentPayload,
   CreateCommentSuccessResponse,
+  CreatePostPayload,
   DeletePostSuccessResponse,
   PostCommentsResponse,
   PostLikesResponse,
@@ -176,6 +177,34 @@ const blogService = {
       if (axios.isAxiosError(error) && error.response) {
         const apiError: ApiErrorResponse = error.response.data;
         throw new Error(apiError.message || 'Failed to post comment.');
+      } else {
+        throw new Error(error.message || 'Failed to connect to server.');
+      }
+    }
+  },
+
+  createPost: async (
+    payload: CreatePostPayload,
+    token: string
+  ): Promise<BlogPost> => {
+    try {
+      const formData = new FormData();
+      formData.append('title', payload.title);
+      formData.append('content', payload.content);
+      formData.append('tags', JSON.stringify(payload.tags));
+      formData.append('image', payload.image);
+
+      const response = await apiClient.post<BlogPost>('/posts', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        const apiError: ApiErrorResponse = error.response.data;
+        throw new Error(apiError.message || 'Failed to create post.');
       } else {
         throw new Error(error.message || 'Failed to connect to server.');
       }

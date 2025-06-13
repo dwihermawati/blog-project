@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform } from 'motion/react';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '@/assets/images/logo.png';
-import { Search } from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Menu } from 'lucide-react';
 import { PenLine } from 'lucide-react';
@@ -26,7 +26,11 @@ import useUser from '@/hooks/useUser';
 import capitalizeName from '@/lib/capitalizeName';
 import AvatarDisplay from '../shared/AvatarDisplay';
 
-const Navbar: React.FC = () => {
+type NavbarProps = {
+  variant?: 'default' | 'secondary';
+};
+
+const Navbar: React.FC<NavbarProps> = ({ variant = 'default' }) => {
   const { scrollY } = useScroll();
   const background = useTransform(
     scrollY,
@@ -89,50 +93,80 @@ const Navbar: React.FC = () => {
           className='custom-container flex items-center justify-between'
           style={{ height: generateClamp(64, 80, 1248) }}
         >
-          <Link
-            to='/'
-            className='cursor-pointer transition-transform hover:scale-110'
-          >
-            <img
-              src={logo}
-              alt='Logo'
-              style={{ width: generateClamp(106, 159, 1248), height: 'auto' }}
-            />
-          </Link>
-          <div className='focus-within:border-primary-300 flex h-12 w-93.25 items-center gap-2 rounded-xl border border-neutral-300 px-4 py-3 max-lg:hidden'>
-            <Search
-              className='hover:text-primary-300 size-6 cursor-pointer text-neutral-500'
-              onClick={handleSearch}
-            />
-            <input
-              type='text'
-              placeholder='Search'
-              className='text-sm-regular w-full text-neutral-950 outline-none placeholder:text-neutral-500'
-              value={searchInputValue}
-              onChange={(e) => setSearchInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSearch();
-                }
-              }}
-            />
-          </div>
+          {variant === 'default' ? (
+            <>
+              <Link
+                to='/'
+                className='cursor-pointer transition-transform hover:scale-110'
+              >
+                <img
+                  src={logo}
+                  alt='Logo'
+                  style={{
+                    width: generateClamp(106, 159, 1248),
+                    height: 'auto',
+                  }}
+                />
+              </Link>
+              <div className='focus-within:border-primary-300 flex h-12 w-93.25 items-center gap-2 rounded-xl border border-neutral-300 px-4 py-3 max-lg:hidden'>
+                <Search
+                  className='hover:text-primary-300 size-6 cursor-pointer text-neutral-500'
+                  onClick={handleSearch}
+                />
+                <input
+                  type='text'
+                  placeholder='Search'
+                  className='text-sm-regular w-full text-neutral-950 outline-none placeholder:text-neutral-500'
+                  value={searchInputValue}
+                  onChange={(e) => setSearchInputValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
+                />
+              </div>
+            </>
+          ) : (
+            <Link
+              to='/profile'
+              className='group flex items-center gap-2 md:gap-4.5'
+            >
+              <ArrowLeft className='group-hover:text-primary-300 size-6 text-neutral-950 group-hover:scale-105' />
+              <span
+                className='md:display-xs-bold text-md-bold group-hover:text-primary-300 text-neutral-900'
+                style={{
+                  fontSize: generateClamp(16, 24, 1248),
+                  lineHeight: generateClamp(30, 36, 1248),
+                }}
+              >
+                Write Post
+              </span>
+            </Link>
+          )}
 
           {/* navbar after login */}
           {isAuthenticated ? (
             <div className='flex items-center justify-center gap-6'>
-              <Link
-                to='/write-post'
-                className='text-sm-semibold text-primary-300 flex items-center gap-2 underline underline-offset-3 hover:scale-105 max-lg:hidden'
-              >
-                <PenLine className='text-primary-300 size-6' />
-                Write Post
-              </Link>
-              <div className='h-6 w-[1px] flex-shrink-0 bg-neutral-300 max-lg:hidden' />
-              <Search
-                className='hover:text-primary-300 size-6 cursor-pointer text-neutral-500 lg:hidden'
-                onClick={() => setIsMobileSearchBarOpen(!isMobileSearchBarOpen)}
-              />
+              {variant === 'default' && (
+                <>
+                  <Link
+                    to='/write-post'
+                    className='text-sm-semibold text-primary-300 flex items-center gap-2 underline underline-offset-3 hover:scale-105 max-lg:hidden'
+                  >
+                    <PenLine className='text-primary-300 size-6' />
+                    Write Post
+                  </Link>
+                  <div className='h-6 w-[1px] flex-shrink-0 bg-neutral-300 max-lg:hidden' />
+                  <Search
+                    className='hover:text-primary-300 size-6 cursor-pointer text-neutral-500 lg:hidden'
+                    onClick={() =>
+                      setIsMobileSearchBarOpen(!isMobileSearchBarOpen)
+                    }
+                  />
+                </>
+              )}
+
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <div className='group flex cursor-pointer items-center gap-3'>
