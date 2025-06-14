@@ -9,6 +9,7 @@ import {
   DeletePostSuccessResponse,
   PostCommentsResponse,
   PostLikesResponse,
+  UpdatePostPayload,
 } from '@/types/blog';
 import { ApiErrorResponse } from '@/types/auth';
 
@@ -69,6 +70,7 @@ const blogService = {
       }
     }
   },
+
   deletePost: async (
     postId: number,
     token: string
@@ -156,7 +158,6 @@ const blogService = {
       }
     }
   },
-
   createComment: async (
     postId: number,
     payload: CreateCommentPayload,
@@ -205,6 +206,44 @@ const blogService = {
       if (axios.isAxiosError(error) && error.response) {
         const apiError: ApiErrorResponse = error.response.data;
         throw new Error(apiError.message || 'Failed to create post.');
+      } else {
+        throw new Error(error.message || 'Failed to connect to server.');
+      }
+    }
+  },
+  updatePost: async (
+    postId: number,
+    payload: UpdatePostPayload,
+    token: string
+  ): Promise<BlogPost> => {
+    try {
+      const formData = new FormData();
+      if (payload.title !== undefined) formData.append('title', payload.title);
+      if (payload.content !== undefined)
+        formData.append('content', payload.content);
+      if (payload.tags !== undefined)
+        formData.append('tags', JSON.stringify(payload.tags));
+      if (payload.image instanceof File) {
+        formData.append('image', payload.image);
+      } else if (payload.image === null) {
+      }
+
+      const response = await apiClient.patch<BlogPost>(
+        `/posts/${postId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        const apiError: ApiErrorResponse = error.response.data;
+        throw new Error(
+          apiError.message || `Failed to update post ID: ${postId}.`
+        );
       } else {
         throw new Error(error.message || 'Failed to connect to server.');
       }

@@ -68,3 +68,10 @@ export interface CreatePostPayload {
   tags: string[];
   image: File;
 }
+
+export interface UpdatePostPayload {
+  title?: string;
+  content?: string;
+  tags?: string[];
+  image?: File;
+}

@@ -11,14 +11,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { BeatLoader } from 'react-spinners';
 import useCreatePost from '@/hooks/useCreatePost';
 import { CreatePostPayload } from '@/types/blog';
-import ImageUploadField from '../shared/ImageUploadField'; // Akan dibuat
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import { Icon } from '@iconify/react';
 import { Label } from '@/components/ui/label';
+import { ImageUploadController } from '../shared/ImageUploadController';
+import { useAnimation, motion } from 'motion/react';
 
 const createPostSchema = z.object({
   title: z
@@ -32,18 +32,15 @@ const createPostSchema = z.object({
     .array(z.string().min(1, 'Tag cannot be empty.'))
     .min(1, 'At least one tag must be filled in.'),
   image: z
-    .any()
-    .refine(
-      (file) => file instanceof File && file.size > 0,
-      'Cover image must be uploaded.'
-    )
-    .refine(
-      (file) => file.size <= 5 * 1024 * 1024,
-      'Maximum image size is 5MB.'
-    )
+    .custom<File>((file) => file instanceof File && file.size > 0, {
+      message: 'Cover image must be uploaded.',
+    })
+    .refine((file) => file.size <= 5 * 1024 * 1024, {
+      message: 'Maximum image size is 5MB.',
+    })
     .refine(
       (file) => ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type),
-      'Only PNG/JPG/JPEG formats are allowed.'
+      { message: 'Only PNG/JPG/JPEG formats are allowed.' }
     ),
 });
 
@@ -87,8 +84,8 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess }) => {
       e.preventDefault();
       const input = e.target as HTMLInputElement;
       const newTag = input.value.trim().replace(/,$/, '');
-      if (newTag && !form.getValues('tags').includes(newTag)) {
-        form.setValue('tags', [...form.getValues('tags'), newTag]);
+      if (newTag && !form.getValues('tags')?.includes(newTag)) {
+        form.setValue('tags', [...(form.getValues('tags') || []), newTag]);
         form.clearErrors('tags');
         input.value = '';
       }
@@ -98,14 +95,26 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess }) => {
   const removeTag = (tagToRemove: string) => {
     form.setValue(
       'tags',
-      form.getValues('tags').filter((tag) => tag !== tagToRemove)
+      (form.getValues('tags') || []).filter((tag) => tag !== tagToRemove)
     );
     form.clearErrors('tags');
   };
 
+  const controls = useAnimation();
+  const shakeAnimation = {
+    x: [0, -10, 10, -10, 10, 0],
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
+      <motion.form
+        onSubmit={form.handleSubmit(onSubmit, () => {
+          controls.start(shakeAnimation);
+        })}
+        animate={controls}
+        className='flex flex-col space-y-5'
+      >
         <FormField
           control={form.control}
           name='title'
@@ -132,23 +141,11 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess }) => {
             <FormItem>
               <Label>Content</Label>
               <FormControl>
-                <ReactQuill
-                  theme='snow'
-                  value={field.value}
-                  onChange={field.onChange}
-                  modules={{
-                    toolbar: [
-                      [{ header: [1, 2, false] }],
-                      ['bold', 'italic', 'underline', 'strike'],
-                      [{ list: 'ordered' }, { list: 'bullet' }],
-                      [{ align: [] }],
-                      ['link', 'image'],
-                      ['clean'],
-                    ],
-                  }}
-                  readOnly={isCreatingPost}
+                <Textarea
                   placeholder='Enter your content'
-                  className='rounded-xl border border-neutral-300 bg-white'
+                  disabled={isCreatingPost}
+                  {...field}
+                  className='min-h-[186px] resize-y'
                   aria-invalid={!!fieldState.error}
                 />
               </FormControl>
@@ -157,24 +154,10 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess }) => {
           )}
         />
 
-        <FormField
+        <ImageUploadController
           control={form.control}
           name='image'
-          render={({ field, fieldState }) => (
-            <FormItem>
-              <Label>Cover Image</Label>
-              <FormControl>
-                <ImageUploadField
-                  onFileChange={field.onChange}
-                  currentFile={field.value}
-                  currentImageUrl={undefined}
-                  disabled={isCreatingPost}
-                  aria-invalid={!!fieldState.error}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          disabled={isCreatingPost}
         />
 
         <FormField
@@ -184,40 +167,44 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess }) => {
             <FormItem>
               <Label>Tags</Label>
               <FormControl>
-                <>
+                <div>
                   <Input
                     placeholder='Enter your tags'
                     onKeyDown={handleTagInput}
                     disabled={isCreatingPost}
                     aria-invalid={!!fieldState.error}
                   />
-                  <div className='mt-2 flex flex-wrap gap-2'>
+                  <div className='mt-1 flex flex-wrap gap-2'>
                     {field.value &&
                       field.value.map((tag, index) => (
                         <span
                           key={index}
-                          className='bg-primary-100 text-primary-800 text-sm-regular flex items-center rounded-full px-3 py-1'
+                          className='text-xs-regular flex items-center gap-2 rounded-md border border-neutral-300 bg-white p-2 text-neutral-900'
                         >
                           {tag}
                           <Icon
                             icon='lucide:x'
-                            className='ml-2 size-4 cursor-pointer'
+                            className='size-3 cursor-pointer'
                             onClick={() => removeTag(tag)}
                           />
                         </span>
                       ))}
                   </div>
-                </>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button disabled={isCreatingPost} className='mt-5 w-full md:w-66.25'>
+        <Button
+          type='submit'
+          disabled={isCreatingPost}
+          className='w-full self-end md:w-66.25'
+        >
           {isCreatingPost ? <BeatLoader size={8} color='#fff' /> : 'Finish'}
         </Button>
-      </form>
+      </motion.form>
     </Form>
   );
 };

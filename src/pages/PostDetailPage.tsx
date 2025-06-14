@@ -65,7 +65,7 @@ const PostDetailPage: React.FC = () => {
         {isLoading ? (
           <BeatLoader size={30} color='#0093DD' className='mx-auto' />
         ) : isError || !post ? (
-          <p className='text-[#EE1D52]'>
+          <p className='text-center text-[#EE1D52]'>
             Error: {error?.message || 'Blog post not found.'}
           </p>
         ) : (

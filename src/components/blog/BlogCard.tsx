@@ -143,7 +143,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
                 </span>
                 <div className='h-6 w-[1px] flex-shrink-0 bg-neutral-300' />
                 <Link
-                  to='/edit-post'
+                  to={`/edit-post/${post.id}`}
                   className='text-sm-semibold text-primary-300 underline underline-offset-3 hover:scale-105'
                 >
                   Edit

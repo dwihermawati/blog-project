@@ -27,7 +27,7 @@ import capitalizeName from '@/lib/capitalizeName';
 import AvatarDisplay from '../shared/AvatarDisplay';
 
 type NavbarProps = {
-  variant?: 'default' | 'secondary';
+  variant?: 'default' | 'secondary' | 'primary';
 };
 
 const Navbar: React.FC<NavbarProps> = ({ variant = 'default' }) => {
@@ -132,16 +132,28 @@ const Navbar: React.FC<NavbarProps> = ({ variant = 'default' }) => {
               to='/profile'
               className='group flex items-center gap-2 md:gap-4.5'
             >
-              <ArrowLeft className='group-hover:text-primary-300 size-6 text-neutral-950 group-hover:scale-105' />
-              <span
-                className='md:display-xs-bold text-md-bold group-hover:text-primary-300 text-neutral-900'
-                style={{
-                  fontSize: generateClamp(16, 24, 1248),
-                  lineHeight: generateClamp(30, 36, 1248),
-                }}
-              >
-                Write Post
-              </span>
+              <ArrowLeft className='group-hover:text-primary-300 size-6 text-neutral-950 group-hover:scale-110' />
+              {variant === 'secondary' ? (
+                <span
+                  className='md:display-xs-bold text-md-bold group-hover:text-primary-300 text-neutral-900'
+                  style={{
+                    fontSize: generateClamp(16, 24, 1248),
+                    lineHeight: generateClamp(30, 36, 1248),
+                  }}
+                >
+                  Write Post
+                </span>
+              ) : (
+                <span
+                  className='md:display-xs-bold text-md-bold group-hover:text-primary-300 text-neutral-900'
+                  style={{
+                    fontSize: generateClamp(16, 24, 1248),
+                    lineHeight: generateClamp(30, 36, 1248),
+                  }}
+                >
+                  Edit Post
+                </span>
+              )}
             </Link>
           )}
 

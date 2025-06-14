@@ -9,6 +9,7 @@ import PostDetailPage from './pages/PostDetailPage';
 import VisitProfilePage from './pages/VisitProfilePage';
 import ProfilePage from './pages/ProfilePage';
 import CreateBlogPostPage from './pages/blog/CreateBlogPostPage';
+import EditBlogPostPage from './pages/blog/EditBlogPostPage';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path='/profile/:email' element={<VisitProfilePage />} />
           <Route path='/profile' element={<ProfilePage />} />
           <Route path='/write-post' element={<CreateBlogPostPage />} />
+          <Route path='/edit-post/:id' element={<EditBlogPostPage />} />
         </Routes>
       </AuthProvider>
     </Router>
