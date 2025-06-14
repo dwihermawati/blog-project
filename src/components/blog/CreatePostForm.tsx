@@ -113,7 +113,7 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess }) => {
           controls.start(shakeAnimation);
         })}
         animate={controls}
-        className='flex flex-col space-y-5'
+        className='flex w-full flex-col space-y-5'
       >
         <FormField
           control={form.control}

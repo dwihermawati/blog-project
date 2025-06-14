@@ -218,14 +218,20 @@ const blogService = {
   ): Promise<BlogPost> => {
     try {
       const formData = new FormData();
-      if (payload.title !== undefined) formData.append('title', payload.title);
-      if (payload.content !== undefined)
+
+      if (payload.title !== undefined) {
+        formData.append('title', payload.title);
+      }
+      if (payload.content !== undefined) {
         formData.append('content', payload.content);
-      if (payload.tags !== undefined)
+      }
+      if (payload.tags !== undefined) {
         formData.append('tags', JSON.stringify(payload.tags));
+      }
       if (payload.image instanceof File) {
         formData.append('image', payload.image);
       } else if (payload.image === null) {
+        formData.append('removeImage', 'true');
       }
 
       const response = await apiClient.patch<BlogPost>(
@@ -234,9 +240,11 @@ const blogService = {
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
           },
         }
       );
+
       return response.data;
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {

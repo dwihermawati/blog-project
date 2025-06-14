@@ -69,7 +69,7 @@ export function ImageUploadController({
                     <button
                       type='button'
                       onClick={() => {
-                        field.onChange(undefined);
+                        field.onChange(null);
                         setPreviewUrl(null);
                         if (inputRef.current) inputRef.current.value = '';
                       }}

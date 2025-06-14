@@ -31,7 +31,7 @@ const EditBlogPostPage: React.FC = () => {
     <>
       <Navbar variant='primary' />
       <main
-        className='custom-container max-w-[734px]'
+        className='custom-container flex max-w-[734px]'
         style={{
           marginBlockStart: generateClamp(80, 128, 1248),
           marginBlockEnd: generateClamp(40, 48, 1248),

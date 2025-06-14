@@ -18,6 +18,7 @@ import { BlogPost, UpdatePostPayload } from '@/types/blog';
 import { Label } from '@/components/ui/label';
 import { ImageUploadController } from '../shared/ImageUploadController';
 import { TagInputField } from '../shared/TagInputField';
+import { useAnimation, motion } from 'motion/react';
 
 const editPostSchema = z.object({
   title: z
@@ -68,12 +69,14 @@ const EditPostForm: React.FC<EditPostFormProps> = ({
   const onSubmit = (data: z.infer<typeof editPostSchema>) => {
     const payload: UpdatePostPayload = {};
 
-    if (data.title !== undefined && data.title !== currentPost.title) {
+    if (data.title && data.title !== currentPost.title) {
       payload.title = data.title;
     }
-    if (data.content !== undefined && data.content !== currentPost.content) {
+
+    if (data.content && data.content !== currentPost.content) {
       payload.content = data.content;
     }
+
     const currentTags = currentPost.tags || [];
     const newTags = data.tags || [];
     if (
@@ -83,23 +86,54 @@ const EditPostForm: React.FC<EditPostFormProps> = ({
       payload.tags = newTags;
     }
 
+    const isDeletingImageWithoutSupport =
+      data.imageFile === null && !!currentPost.imageUrl;
+
+    if (isDeletingImageWithoutSupport) {
+      form.setError('imageFile', {
+        type: 'manual',
+        message: 'Image deletion is not supported.',
+      });
+      controls.start(shakeAnimation);
+      return;
+    }
+
     if (data.imageFile instanceof File) {
       payload.image = data.imageFile;
     } else if (data.imageFile === null && currentPost.imageUrl) {
+      payload.image = null;
     }
 
-    if (Object.keys(payload).length === 0) {
+    const isPayloadEmpty =
+      Object.keys(payload).length === 0 ||
+      (Object.keys(payload).length === 1 &&
+        'image' in payload &&
+        payload.image === undefined);
+
+    if (isPayloadEmpty) {
       alert('No changes detected.');
       onUpdateSuccess();
       return;
     }
 
-    updatePost({ postId: currentPost.id, payload: payload });
+    updatePost({ postId: currentPost.id, payload });
+  };
+
+  const controls = useAnimation();
+  const shakeAnimation = {
+    x: [0, -10, 10, -10, 10, 0],
+    transition: { duration: 0.4, ease: 'easeInOut' },
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
+      <motion.form
+        onSubmit={form.handleSubmit(onSubmit, () => {
+          controls.start(shakeAnimation);
+        })}
+        animate={controls}
+        className='w-full space-y-5'
+      >
         <FormField
           control={form.control}
           name='title'
@@ -168,7 +202,7 @@ const EditPostForm: React.FC<EditPostFormProps> = ({
         <Button type='submit' disabled={isUpdatingPost} className='mt-6 w-full'>
           {isUpdatingPost ? <BeatLoader size={8} color='#fff' /> : 'Save'}
         </Button>
-      </form>
+      </motion.form>
     </Form>
   );
 };

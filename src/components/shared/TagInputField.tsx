@@ -41,7 +41,7 @@ export const TagInputField: React.FC<TagInputFieldProps> = ({
     <FormItem>
       <Label>{label}</Label>
       <FormControl>
-        <>
+        <div>
           <Input
             placeholder='Enter your tags'
             onKeyDown={handleAddTag}
@@ -65,7 +65,7 @@ export const TagInputField: React.FC<TagInputFieldProps> = ({
               </span>
             ))}
           </div>
-        </>
+        </div>
       </FormControl>
       <FormMessage />
     </FormItem>
