@@ -112,7 +112,7 @@ const StatisticDialog: React.FC<StatisticDialogProps> = ({
                   Comment ({commentsData.length})
                 </span>
                 <div className='flex max-h-[400px] flex-col gap-3 overflow-y-auto'>
-                  {commentsData.map((comment) => (
+                  {[...commentsData].reverse().map((comment) => (
                     <CommentCard key={comment.id} comment={comment} />
                   ))}
                 </div>

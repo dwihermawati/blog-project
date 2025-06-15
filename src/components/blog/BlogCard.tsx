@@ -144,7 +144,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
               <div className='flex items-center gap-3'>
                 <span
                   className='text-sm-semibold text-primary-300 cursor-pointer underline underline-offset-3 hover:scale-105'
-                  onClick={handleCommentClick}
+                  onClick={() => setIsStatisticDialogOpen(true)}
                 >
                   Statistic
                 </span>
@@ -238,7 +238,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
             </div>
             <div
               className='group flex cursor-pointer items-center gap-1.5'
-              onClick={() => setCommentDialogOpen(true)}
+              onClick={handleCommentClick}
             >
               <Icon
                 icon='proicons:comment'
