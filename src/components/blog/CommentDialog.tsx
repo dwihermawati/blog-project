@@ -133,9 +133,11 @@ const CommentDialog: React.FC<CommentDialogProps> = ({
               Error loading comments: {commentsError?.message}
             </p>
           ) : commentsData && commentsData.length > 0 ? (
-            commentsData.map((comment) => (
-              <CommentCard key={comment.id} comment={comment} />
-            ))
+            [...commentsData]
+              .reverse()
+              .map((comment) => (
+                <CommentCard key={comment.id} comment={comment} />
+              ))
           ) : (
             <p className='text-muted-foreground text-center'>
               No comments yet.

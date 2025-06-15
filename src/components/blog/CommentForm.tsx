@@ -149,9 +149,12 @@ const CommentForm: React.FC<PostCommentsProps> = ({ postId, onOpenDialog }) => {
         </div>
       ) : commentsData && commentsData.length > 0 ? (
         <div className='flex flex-col gap-4'>
-          {commentsData.slice(0, 3).map((comment) => (
-            <CommentCard key={comment.id} comment={comment} />
-          ))}
+          {[...commentsData]
+            .reverse()
+            .slice(0, 3)
+            .map((comment) => (
+              <CommentCard key={comment.id} comment={comment} />
+            ))}
         </div>
       ) : (
         <p className='text-muted-foreground text-center'>No comments yet.</p>
