@@ -1,4 +1,3 @@
-import BlogList from '@/components/blog/BlogList';
 import { Footer } from '@/components/common/Footer';
 import Navbar from '@/components/common/Navbar';
 import AvatarDisplay from '@/components/shared/AvatarDisplay';
@@ -18,6 +17,8 @@ import { renderSafeHTML } from '@/lib/renderSafeHTML';
 import CommentForm from '@/components/blog/CommentForm';
 import { toast } from 'react-toastify';
 import CommentDialog from '@/components/blog/CommentDialog';
+import BlogCard from '@/components/blog/BlogCard';
+import useBlogPosts from '@/hooks/useBlogPosts';
 
 const PostDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -32,6 +33,13 @@ const PostDetailPage: React.FC = () => {
   } = usePostDetail({
     postId: postId as number,
     enabled: !!postId,
+  });
+
+  const { data: otherPosts } = useBlogPosts({
+    page: 1,
+    limit: 3,
+    enabled: !!post?.id,
+    sortBy: 'recommended',
   });
 
   const { isAuthenticated } = useAuth();
@@ -190,12 +198,16 @@ const PostDetailPage: React.FC = () => {
           <h2 className='md:display-xs-bold text-xl-bold text-neutral-900'>
             Another Post
           </h2>
-          <BlogList
-            itemsPerPage={1}
-            showTitle={false}
-            showPagination={false}
-            sortBy='recommended'
-          />
+          {otherPosts?.data?.filter((p) => p.id !== post.id)?.length ? (
+            otherPosts.data
+              .filter((p) => p.id !== post.id)
+              .slice(0, 1)
+              .map((p) => <BlogCard key={p.id} post={p} />)
+          ) : (
+            <p className='text-sm-regular text-neutral-500'>
+              No other posts to show.
+            </p>
+          )}
         </div>
       </main>
       <CommentDialog
