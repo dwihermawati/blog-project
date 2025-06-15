@@ -125,8 +125,9 @@ const ProfilePage: React.FC = () => {
                   </Link>
                 </div>
                 <BlogList
-                  queryKeyPrefix={['myPosts', userProfile.id.toString()]}
+                  sortBy='myPosts'
                   userId={userProfile.id}
+                  queryKeyPrefix={['myPosts', userProfile.id.toString()]}
                   showTitle={false}
                   itemsPerPage={5}
                   cardVariant='user-blogpost'

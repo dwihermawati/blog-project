@@ -3,6 +3,7 @@ import useBlogPosts from '@/hooks/useBlogPosts';
 import BlogCard from './BlogCard';
 import PaginationControls from '@/components/shared/PaginationControls';
 import EmptyState from '../shared/EmptyState';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface BlogListEmptyStateProps {
   title: string;
@@ -19,7 +20,7 @@ interface BlogListProps {
   itemsPerPage?: number;
   searchQuery?: string;
   userId?: number;
-  sortBy?: 'recommended' | 'most-liked' | 'search';
+  sortBy?: 'recommended' | 'most-liked' | 'search' | 'myPosts';
   showTitle?: boolean;
   titleText?: string;
   cardVariant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -44,6 +45,7 @@ const BlogList: React.FC<BlogListProps> = ({
   emptyStateConfig,
   queryKeyPrefix,
 }) => {
+  const { token } = useAuth();
   const [currentPage, setCurrentPage] = useState(initialPage);
 
   const queryParams = {
@@ -52,6 +54,7 @@ const BlogList: React.FC<BlogListProps> = ({
     search: searchQuery,
     userId: userId,
     sortBy: sortBy,
+    token,
   };
 
   const {

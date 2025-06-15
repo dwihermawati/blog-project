@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import apiClient from '@/lib/api';
 import {
   BlogListResponse,
@@ -18,31 +18,111 @@ interface GetPostsParams {
   page?: number;
   search?: string;
   userId?: number;
-  sortBy?: 'recommended' | 'most-liked' | 'search';
+  sortBy?: 'recommended' | 'most-liked' | 'search' | 'myPosts';
+  token?: string;
 }
 
 const blogService = {
+  // getPosts: async (params?: GetPostsParams): Promise<BlogListResponse> => {
+  //   let path = '/posts';
+  //   const requestParams: any = {
+  //     limit: params?.limit || 5,
+  //     page: params?.page || 1,
+  //   };
+
+  //   if (params?.sortBy === 'myPosts' && params?.userId) {
+  //   } else if (params?.sortBy === 'recommended') {
+  //     path = '/posts/recommended';
+  //   } else if (params?.sortBy === 'most-liked') {
+  //     path = '/posts/most-liked';
+  //   } else if (params?.sortBy === 'search') {
+  //     path = '/posts/search';
+  //     if (params.search && params.search.trim() !== '') {
+  //       requestParams.query = params.search;
+  //     }
+  //   } else {
+  //     path = '/posts';
+  //   }
+
+  //   console.log('blogService.getPosts: Final path:', path);
+  //   console.log('blogService.getPosts: Final requestParams:', requestParams);
+
+  //   try {
+  //     const response = await apiClient.get<BlogListResponse>(path, {
+  //       params: requestParams,
+  //     });
+  //     return response.data;
+  //   } catch (error: any) {
+  //     if (axios.isAxiosError(error) && error.response) {
+  //       const apiError: ApiErrorResponse = error.response.data;
+  //       throw new Error(
+  //         apiError.message || `Failed to fetch post from ${path}.`
+  //       );
+  //     } else {
+  //       throw new Error(error.message || 'Failed to connect to server.');
+  //     }
+  //   }
+  // },
+
+  // getMyPosts: async (
+  //   page: number = 1,
+  //   limit: number = 5,
+  //   token: string
+  // ): Promise<BlogListResponse> => {
+  //   try {
+  //     const response = await apiClient.get<BlogListResponse>(
+  //       '/posts/my-posts',
+  //       {
+  //         params: { page, limit },
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+  //     return response.data;
+  //   } catch (error: any) {
+  //     if (axios.isAxiosError(error) && error.response) {
+  //       const apiError: ApiErrorResponse = error.response.data;
+  //       throw new Error(apiError.message || 'Failed to fetch your post.');
+  //     } else {
+  //       throw new Error(error.message || 'Failed to connect to server.');
+  //     }
+  //   }
+  // },
+
   getPosts: async (params?: GetPostsParams): Promise<BlogListResponse> => {
     let path = '/posts';
     const requestParams: any = {
       limit: params?.limit || 5,
       page: params?.page || 1,
-      userId: params?.userId,
     };
 
-    if (params?.sortBy === 'recommended') {
+    const config: AxiosRequestConfig = {
+      params: requestParams,
+    };
+
+    if (params?.sortBy === 'myPosts' && params?.userId) {
+      path = '/posts/my-posts';
+      if (params.token) {
+        config.headers = {
+          Authorization: `Bearer ${params.token}`,
+        };
+      } else {
+        throw new Error('Token is required for myPosts');
+      }
+    } else if (params?.sortBy === 'recommended') {
       path = '/posts/recommended';
     } else if (params?.sortBy === 'most-liked') {
       path = '/posts/most-liked';
-    } else if (params?.search) {
+    } else if (params?.sortBy === 'search') {
       path = '/posts/search';
-      requestParams.query = params.search;
+      if (params.search && params.search.trim() !== '') {
+        requestParams.query = params.search;
+      }
     }
 
     try {
-      const response = await apiClient.get<BlogListResponse>(path, {
-        params: requestParams,
-      });
+      const response = await apiClient.get<BlogListResponse>(path, config);
       return response.data;
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
@@ -55,6 +135,7 @@ const blogService = {
       }
     }
   },
+
   getPostById: async (id: string | number): Promise<BlogPost> => {
     try {
       const response = await apiClient.get<BlogPost>(`/posts/${id}`);

@@ -46,6 +46,7 @@ const userService = {
       const apiPayload = {
         currentPassword: payload.currentPassword,
         newPassword: payload.newPassword,
+        confirmPassword: payload.confirmPassword,
       };
 
       const response = await apiClient.patch<ChangePasswordSuccessResponse>(

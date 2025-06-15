@@ -17,6 +17,7 @@ export interface BlogPost {
   comments: number;
   author: Author;
   likedByUser: boolean;
+  likedBy: LikedByUser[];
 }
 
 export interface BlogListResponse {

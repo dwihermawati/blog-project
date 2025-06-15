@@ -18,6 +18,26 @@ const useLikePost = (options?: UseLikePostOptions) => {
   const queryClient = useQueryClient();
   const { token } = useAuth();
 
+  // 🔁 Helper untuk update semua list cache (blogPosts, myPosts, dll)
+  const updatePostInLists = (
+    queryKeyPrefix: string[],
+    postId: number,
+    updater: (post: BlogPost) => BlogPost
+  ) => {
+    queryClient.setQueriesData<BlogListResponse>(
+      { queryKey: queryKeyPrefix },
+      (oldQuery) => {
+        if (!oldQuery) return oldQuery;
+        return {
+          ...oldQuery,
+          data: oldQuery.data.map((post) =>
+            post.id === postId ? updater(post) : post
+          ),
+        };
+      }
+    );
+  };
+
   return useMutation<BlogPost, Error, number, LikePostContext>({
     mutationFn: async (postId) => {
       if (!token) throw new Error('You must be logged in to give a like.');
@@ -29,16 +49,21 @@ const useLikePost = (options?: UseLikePostOptions) => {
         queryKey: ['postDetail', postIdToLike],
       });
       await queryClient.cancelQueries({ queryKey: ['blogPosts'] });
+      await queryClient.cancelQueries({ queryKey: ['myPosts'] });
 
-      // ✅ Gunakan post dari props jika ada, fallback ke query
       const previousPostDetail =
         options?.post?.id === postIdToLike
           ? options.post
           : queryClient.getQueryData<BlogPost>(['postDetail', postIdToLike]);
 
-      const previousBlogLists = queryClient.getQueriesData<BlogListResponse>({
-        queryKey: ['blogPosts'],
-      });
+      const previousBlogLists = [
+        ...queryClient.getQueriesData<BlogListResponse>({
+          queryKey: ['blogPosts'],
+        }),
+        ...queryClient.getQueriesData<BlogListResponse>({
+          queryKey: ['myPosts'],
+        }),
+      ];
 
       const wasLiked = previousPostDetail?.likedByUser ?? false;
 
@@ -51,25 +76,15 @@ const useLikePost = (options?: UseLikePostOptions) => {
         });
       }
 
-      // ✅ Update semua list blog
-      queryClient.setQueriesData<BlogListResponse>(
-        { queryKey: ['blogPosts'] },
-        (oldQuery) => {
-          if (!oldQuery) return oldQuery;
-          return {
-            ...oldQuery,
-            data: oldQuery.data.map((post) =>
-              post.id === postIdToLike
-                ? {
-                    ...post,
-                    likes: post.likes + (wasLiked ? -1 : 1),
-                    likedByUser: !wasLiked,
-                  }
-                : post
-            ),
-          };
-        }
-      );
+      // ✅ Update semua list: blogPosts & myPosts
+      const updateFn = (post: BlogPost) => ({
+        ...post,
+        likes: post.likes + (wasLiked ? -1 : 1),
+        likedByUser: !wasLiked,
+      });
+
+      updatePostInLists(['blogPosts'], postIdToLike, updateFn);
+      updatePostInLists(['myPosts'], postIdToLike, updateFn);
 
       return { previousPostDetail, previousBlogLists };
     },
@@ -92,6 +107,7 @@ const useLikePost = (options?: UseLikePostOptions) => {
     onSettled: (_data, error, postIdToLike) => {
       queryClient.invalidateQueries({ queryKey: ['postDetail', postIdToLike] });
       queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['myPosts'] });
 
       if (!error) options?.onSuccess?.();
     },

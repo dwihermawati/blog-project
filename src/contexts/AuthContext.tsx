@@ -21,7 +21,7 @@ interface UserInfo {
 interface AuthContextType {
   isAuthenticated: boolean;
   user: UserInfo | null;
-  token: string | null;
+  token?: string;
   login: (
     loginData: LoginSuccessResponse,
     emailInput: string,
@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<UserInfo | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | undefined>(undefined);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -94,7 +94,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const logout = () => {
-    setToken(null);
+    setToken(undefined);
     setIsAuthenticated(false);
     setUser(null);
     localStorage.removeItem('authToken');
