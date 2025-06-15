@@ -47,7 +47,6 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
     };
   }, [className, style]);
   const fontSizeCalc = avatarSize > 0 ? `${avatarSize * 0.4}px` : '1rem';
-  console.log('Avatar URL:', avatarUrl);
 
   return (
     <div
