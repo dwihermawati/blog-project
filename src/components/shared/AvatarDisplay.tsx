@@ -11,6 +11,12 @@ interface AvatarDisplayProps {
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const getFullAvatarUrl = (url?: string | null): string | undefined => {
+  if (!url) return undefined;
+  return url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+};
+
 const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
   avatarUrl,
   displayName,
@@ -41,6 +47,7 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
     };
   }, [className, style]);
   const fontSizeCalc = avatarSize > 0 ? `${avatarSize * 0.4}px` : '1rem';
+  console.log('Avatar URL:', avatarUrl);
 
   return (
     <div
@@ -54,7 +61,7 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
     >
       {hasAvatar ? (
         <img
-          src={avatarUrl as string}
+          src={getFullAvatarUrl(avatarUrl)}
           alt={displayName}
           className='size-full rounded-full border border-neutral-300 object-cover'
         />
