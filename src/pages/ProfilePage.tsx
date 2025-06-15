@@ -21,6 +21,8 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import EditProfileForm from '@/components/profile/EditProfileForm';
+import useBlogPosts from '@/hooks/useBlogPosts';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ProfilePage: React.FC = () => {
   const {
@@ -31,6 +33,16 @@ const ProfilePage: React.FC = () => {
   } = useUser();
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  const { token } = useAuth();
+  const { data: userPosts, isLoading: isUserPostsLoading } = useBlogPosts({
+    userId: userProfile?.id,
+    sortBy: 'myPosts',
+    enabled: !!userProfile?.id && !!token,
+    queryKeyPrefix: ['myPosts-count', userProfile!.id?.toString()],
+    limit: 1,
+    token,
+  });
 
   return (
     <>
@@ -114,7 +126,9 @@ const ProfilePage: React.FC = () => {
               <TabsContent value='yourpost' className='mt-4 md:mt-5'>
                 <div className='flex gap-4 max-md:flex-col-reverse md:items-center md:justify-between md:border-b md:border-b-neutral-300 md:pb-5'>
                   <h3 className='text-lg-bold md:display-xs-bold text-neutral-900'>
-                    Count Post
+                    {!isUserPostsLoading && userPosts
+                      ? `${userPosts.total} Post`
+                      : '(...)'}
                   </h3>
                   <div className='h-[1px] w-full bg-neutral-300 md:hidden' />
                   <Link to='/write-post'>
