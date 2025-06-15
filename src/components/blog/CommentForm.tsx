@@ -23,6 +23,7 @@ import useComments from '@/hooks/useComments';
 import useUser from '@/hooks/useUser';
 import { useAuth } from '@/contexts/AuthContext';
 import capitalizeName from '@/lib/capitalizeName';
+import { toast } from 'react-toastify';
 
 const commentSchema = z.object({
   content: z.string().min(3, 'Comments cannot be empty.'),
@@ -57,16 +58,16 @@ const CommentForm: React.FC<PostCommentsProps> = ({ postId }) => {
     useCreateComment({
       onSuccess: () => {
         form.reset();
-        alert('Comment submitted successfully!');
+        toast.success('Comment submitted successfully!');
       },
       onError: (err) => {
-        alert(`Failed to post comment:\n${err.message}`);
+        toast.error(`Failed to post comment:\n${err.message}`);
       },
     });
 
   const handleCommentSubmit = (data: z.infer<typeof commentSchema>) => {
     if (!isAuthenticated || !token) {
-      alert('You must be logged in to post a comment.');
+      toast.info('You must be logged in to post a comment.');
       navigate('/login');
       return;
     }

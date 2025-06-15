@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label';
 import { ImageUploadController } from '../shared/ImageUploadController';
 import { TagInputField } from '../shared/TagInputField';
 import { useAnimation, motion } from 'motion/react';
+import { toast } from 'react-toastify';
 
 const editPostSchema = z.object({
   title: z
@@ -58,11 +59,11 @@ const EditPostForm: React.FC<EditPostFormProps> = ({
 
   const { mutate: updatePost, isPending: isUpdatingPost } = useUpdatePost({
     onSuccess: () => {
-      alert('Post successfully updated!');
+      toast.success('Post successfully updated!');
       onUpdateSuccess();
     },
     onError: (error) => {
-      alert(`Failed to update post: ${error.message}`);
+      toast.error(`Failed to update post: ${error.message}`);
     },
   });
 
@@ -111,7 +112,7 @@ const EditPostForm: React.FC<EditPostFormProps> = ({
         payload.image === undefined);
 
     if (isPayloadEmpty) {
-      alert('No changes detected.');
+      toast.info('No changes detected.');
       onUpdateSuccess();
       return;
     }

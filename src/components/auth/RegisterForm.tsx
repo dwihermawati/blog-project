@@ -13,6 +13,7 @@ import { Button } from '../ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import useRegister from '@/hooks/useRegister';
 import { RegisterPayload } from '@/types/auth';
+import { toast } from 'react-toastify';
 
 const registerSchema = z
   .object({
@@ -64,7 +65,7 @@ const RegisterForm: React.FC = () => {
       const successMessage =
         data.message || 'Registration successful! Please login.';
       form.reset();
-      alert(successMessage);
+      toast.success(successMessage);
       navigate('/login', {
         state: {
           message: successMessage,
@@ -75,7 +76,7 @@ const RegisterForm: React.FC = () => {
       console.error('Error in register mutation:', err);
       const errorMessage =
         err.message || 'Registration failed. Please try again.';
-      alert(errorMessage);
+      toast.error(errorMessage);
       controls.start(shakeAnimation);
     },
   });

@@ -16,6 +16,7 @@ import useLikePost from '@/hooks/useLikePost';
 import useComments from '@/hooks/useComments';
 import { renderSafeHTML } from '@/lib/renderSafeHTML';
 import CommentForm from '@/components/blog/CommentForm';
+import { toast } from 'react-toastify';
 
 const PostDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -38,7 +39,7 @@ const PostDetailPage: React.FC = () => {
 
   const handleLikeClick = () => {
     if (!isAuthenticated) {
-      alert('You must be logged in to give a like!');
+      toast.info('You must be logged in to give a like!');
       navigate('/login');
       return;
     }

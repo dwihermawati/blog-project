@@ -10,11 +10,13 @@ import VisitProfilePage from './pages/VisitProfilePage';
 import ProfilePage from './pages/ProfilePage';
 import CreateBlogPostPage from './pages/blog/CreateBlogPostPage';
 import EditBlogPostPage from './pages/blog/EditBlogPostPage';
+import { ToastContainer } from 'react-toastify';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
+        <ToastContainer position='top-center' autoClose={3000} />
         <Routes>
           <Route path='/' element={<HomePage />} />
           <Route path='/login' element={<LoginPage />} />

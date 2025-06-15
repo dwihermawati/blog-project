@@ -9,6 +9,7 @@ import { BeatLoader } from 'react-spinners';
 import useChangePassword from '@/hooks/useChangePassword';
 import { useAnimation, motion } from 'motion/react';
 import { Label } from '@/components/ui/label';
+import { toast } from 'react-toastify';
 
 const changePasswordSchema = z
   .object({
@@ -42,11 +43,11 @@ const ChangePasswordForm: React.FC = () => {
   const { mutate: changePassword, isPending: isChangingPassword } =
     useChangePassword({
       onSuccess: (data) => {
-        alert(data.message || 'Password changed successfully!');
+        toast.success(data.message || 'Password changed successfully!');
         form.reset();
       },
       onError: (error) => {
-        alert(`Failed to change password: ${error.message}`);
+        toast.error(`Failed to change password: ${error.message}`);
       },
     });
 

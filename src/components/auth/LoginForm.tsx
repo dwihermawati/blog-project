@@ -14,6 +14,7 @@ import useLogin from '@/hooks/useLogin';
 import { useAuth } from '@/contexts/AuthContext';
 import userService from '@/services/userService';
 import { Label } from '@/components/ui/label';
+import { toast } from 'react-toastify';
 
 const loginSchema = z.object({
   email: z
@@ -57,7 +58,7 @@ const LoginForm: React.FC = () => {
         );
         auth.login(data, variables.email);
       }
-      alert('Login successful! Welcome back.');
+      toast.success('Login successful! Welcome back.');
 
       form.reset();
       navigate('/', { state: { message: 'Login successful! Welcome back.' } });
@@ -66,6 +67,8 @@ const LoginForm: React.FC = () => {
     onError: (err) => {
       console.error('Login failed:', err);
       controls.start(shakeAnimation);
+
+      toast.error('Login failed. Please check your credentials.');
 
       form.setError('email', {
         type: 'server',

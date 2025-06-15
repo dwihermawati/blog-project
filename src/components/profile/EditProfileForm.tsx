@@ -11,6 +11,7 @@ import useUpdateProfile from '@/hooks/useUpdateProfile';
 import { UpdateProfilePayload, UserProfileResponse } from '@/types/user';
 import { Icon } from '@iconify/react';
 import { Label } from '@/components/ui/label';
+import { toast } from 'react-toastify';
 
 const editProfileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.').optional(),
@@ -67,11 +68,11 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
   const { mutate: updateProfile, isPending: isUpdatingProfile } =
     useUpdateProfile({
       onSuccess: () => {
-        alert('Profile updated successfully!');
+        toast.success('Profile updated successfully!');
         onUpdateSuccess();
       },
       onError: (error) => {
-        alert(`Failed to update profile: ${error.message}`);
+        toast.error(`Failed to update profile: ${error.message}`);
       },
     });
 

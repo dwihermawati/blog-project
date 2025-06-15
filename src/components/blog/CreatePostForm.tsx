@@ -19,6 +19,7 @@ import { Icon } from '@iconify/react';
 import { Label } from '@/components/ui/label';
 import { ImageUploadController } from '../shared/ImageUploadController';
 import { useAnimation, motion } from 'motion/react';
+import { toast } from 'react-toastify';
 
 const createPostSchema = z.object({
   title: z
@@ -61,11 +62,11 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess }) => {
 
   const { mutate: createPost, isPending: isCreatingPost } = useCreatePost({
     onSuccess: () => {
-      alert('Post successfully created!');
+      toast.success('Post successfully created!');
       onSuccess();
     },
     onError: (error) => {
-      alert(`Failed to create post: ${error.message}`);
+      toast.error(`Failed to create post: ${error.message}`);
     },
   });
 

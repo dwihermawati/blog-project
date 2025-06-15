@@ -26,6 +26,7 @@ import useLikePost from '@/hooks/useLikePost';
 import { renderSafeHTML } from '@/lib/renderSafeHTML';
 import useComments from '@/hooks/useComments';
 import StatisticDialog from './StatisticDialog';
+import { toast } from 'react-toastify';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -40,10 +41,10 @@ const BlogCard: React.FC<BlogCardProps> = ({
 }) => {
   const { mutate: deletePost, isPending: isDeleting } = useDeletePost({
     onSuccess: () => {
-      alert('Post successfully deleted!');
+      toast.success('Post successfully deleted!');
     },
     onError: (error) => {
-      alert(`Failed to delete post: ${error.message}`);
+      toast.error(`Failed to delete post: ${error.message}`);
     },
   });
 
@@ -53,7 +54,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
 
   const handleLikeClick = () => {
     if (!isAuthenticated) {
-      alert('You must be logged in to give a like!');
+      toast.info('You must be logged in to give a like!');
       navigate('/login');
       return;
     }
