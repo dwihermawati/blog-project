@@ -1,11 +1,4 @@
-import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { BeatLoader } from 'react-spinners';
 import { Link, useNavigate } from 'react-router-dom';
 import AvatarDisplay from '@/components/shared/AvatarDisplay';
-import { XIcon } from 'lucide-react';
 import CommentCard from './CommentCard';
 import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import useCreateComment from '@/hooks/useCreateComment';
@@ -31,13 +23,13 @@ const commentSchema = z.object({
 
 type PostCommentsProps = {
   postId: number;
+  onOpenDialog?: () => void;
 };
 
-const CommentForm: React.FC<PostCommentsProps> = ({ postId }) => {
+const CommentForm: React.FC<PostCommentsProps> = ({ postId, onOpenDialog }) => {
   const navigate = useNavigate();
   const { isAuthenticated, user: authUser, token } = useAuth();
   const { data: userData, isLoading: isUserLoading } = useUser();
-  const [isCommentsDialogOpen, setIsCommentsDialogOpen] = useState(false);
 
   const currentUserAvatarUrl = userData?.avatarUrl;
   const currentUserDisplayName = userData?.name || authUser?.email || 'User';
@@ -168,66 +160,11 @@ const CommentForm: React.FC<PostCommentsProps> = ({ postId }) => {
       {commentsData && commentsData.length > 3 && (
         <p
           className='text-sm-semibold text-primary-300 origin-left transform cursor-pointer underline underline-offset-3 hover:scale-101'
-          onClick={() => setIsCommentsDialogOpen(true)}
+          onClick={() => onOpenDialog?.()}
         >
           See All Comments
         </p>
       )}
-
-      <Dialog
-        open={isCommentsDialogOpen}
-        onOpenChange={setIsCommentsDialogOpen}
-      >
-        <DialogContent className='max-h-225.5 max-w-153.25'>
-          <DialogHeader>
-            <DialogTitle>Comments({commentsData?.length})</DialogTitle>
-            <DialogClose>
-              <XIcon className='size-6 cursor-pointer text-neutral-950 hover:text-neutral-500' />
-            </DialogClose>
-          </DialogHeader>
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleCommentSubmit)}
-              className='flex flex-col gap-3'
-            >
-              <FormField
-                control={form.control}
-                name='content'
-                render={({ field, fieldState }) => (
-                  <FormItem>
-                    <Label>Give your Comments</Label>
-                    <Textarea
-                      className='h-35 resize-none rounded-xl border border-neutral-300 px-4 py-2'
-                      placeholder='Enter your comment'
-                      disabled={isCreatingComment}
-                      {...field}
-                      aria-invalid={!!fieldState.error}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type='submit'
-                className='w-full self-end md:w-51'
-                disabled={isCreatingComment}
-              >
-                {isCreatingComment ? (
-                  <BeatLoader size={8} color='#fff' />
-                ) : (
-                  'Send'
-                )}
-              </Button>
-              <div className='h-[1px] w-full bg-neutral-300' />
-            </form>
-            <div className='mt-5 flex max-h-[300px] flex-col gap-3 overflow-y-auto'>
-              {commentsData?.map((comment) => (
-                <CommentCard key={comment.id} comment={comment} />
-              ))}
-            </div>
-          </Form>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };

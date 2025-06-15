@@ -27,6 +27,7 @@ import { renderSafeHTML } from '@/lib/renderSafeHTML';
 import useComments from '@/hooks/useComments';
 import StatisticDialog from './StatisticDialog';
 import { toast } from 'react-toastify';
+import CommentDialog from './CommentDialog';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -67,6 +68,11 @@ const BlogCard: React.FC<BlogCardProps> = ({
   });
 
   const [isStatisticDialogOpen, setIsStatisticDialogOpen] = useState(false);
+  const [isCommentDialogOpen, setCommentDialogOpen] = useState(false);
+
+  const handleCommentClick = () => {
+    setCommentDialogOpen(true);
+  };
 
   return (
     <div
@@ -138,7 +144,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
               <div className='flex items-center gap-3'>
                 <span
                   className='text-sm-semibold text-primary-300 cursor-pointer underline underline-offset-3 hover:scale-105'
-                  onClick={() => setIsStatisticDialogOpen(true)}
+                  onClick={handleCommentClick}
                 >
                   Statistic
                 </span>
@@ -230,7 +236,10 @@ const BlogCard: React.FC<BlogCardProps> = ({
                 {post.likes}
               </span>
             </div>
-            <div className='group flex cursor-pointer items-center gap-1.5'>
+            <div
+              className='group flex cursor-pointer items-center gap-1.5'
+              onClick={() => setCommentDialogOpen(true)}
+            >
               <Icon
                 icon='proicons:comment'
                 className='group-hover:text-primary-300 size-5 text-neutral-600 group-hover:scale-105'
@@ -247,6 +256,11 @@ const BlogCard: React.FC<BlogCardProps> = ({
         isOpen={isStatisticDialogOpen}
         onClose={() => setIsStatisticDialogOpen(false)}
         postLikesCount={post.likes}
+      />
+      <CommentDialog
+        postId={post.id}
+        open={isCommentDialogOpen}
+        onOpenChange={setCommentDialogOpen}
       />
     </div>
   );
