@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BeatLoader } from 'react-spinners';
-import usePostLikes from '@/hooks/usePostLikes';
+import usePostLikes from '@/hooks/useGetLikes';
 import useComments from '@/hooks/useComments';
 import CommentCard from './CommentCard';
 import LikeCard from './LikeCard';

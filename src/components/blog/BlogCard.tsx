@@ -4,7 +4,7 @@ import { formatDateTime } from '@/lib/formatDateTime';
 import { cn } from '@/lib/utils';
 import { BlogPost } from '@/types/blog';
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ThumbsUp, XIcon } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import AvatarDisplay from '../shared/AvatarDisplay';
@@ -21,14 +21,13 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { BeatLoader } from 'react-spinners';
-import { useAuth } from '@/contexts/AuthContext';
-import useLikePost from '@/hooks/useLikePost';
 import { renderSafeHTML } from '@/lib/renderSafeHTML';
 import useComments from '@/hooks/useComments';
 import StatisticDialog from './StatisticDialog';
 import { toast } from 'react-toastify';
 import CommentDialog from './CommentDialog';
 import useUserProfileByEmail from '@/hooks/useUserProfileByEmail';
+import usePostLikeState from '@/hooks/usePostLikeState';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -50,18 +49,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
     },
   });
 
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const { mutate } = useLikePost({ post });
-
-  const handleLikeClick = () => {
-    if (!isAuthenticated) {
-      toast.info('You must be logged in to give a like!');
-      navigate('/login');
-      return;
-    }
-    mutate(post.id);
-  };
+  const { isLiked, likesCount, handleLikeClick } = usePostLikeState(post);
 
   const { data: commentsData } = useComments({
     postId: post?.id as number,
@@ -226,7 +214,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
         {(variant === 'blogpost' || variant === 'most-liked') && (
           <div className='flex items-center gap-3 md:gap-5'>
             <div className='group flex cursor-pointer items-center gap-1.5'>
-              {post?.likedByUser ? (
+              {isLiked ? (
                 <Icon
                   icon='mdi:like'
                   className='text-primary-300 size-5 scale-105'
@@ -239,7 +227,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
                 />
               )}
               <span className='md:text-sm-regular text-xs-regular group-hover:text-primary-300 text-neutral-600'>
-                {post.likes}
+                {likesCount}
               </span>
             </div>
             <div

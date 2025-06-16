@@ -1,7 +1,6 @@
 import { Footer } from '@/components/common/Footer';
 import Navbar from '@/components/common/Navbar';
 import AvatarDisplay from '@/components/shared/AvatarDisplay';
-import { useAuth } from '@/contexts/AuthContext';
 import { generateClamp } from '@/function/generate-clamp';
 import usePostDetail from '@/hooks/usePostDetail';
 import capitalizeName from '@/lib/capitalizeName';
@@ -9,22 +8,20 @@ import { formatDateTime } from '@/lib/formatDateTime';
 import { Icon } from '@iconify/react';
 import { ThumbsUp } from 'lucide-react';
 import React, { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { BeatLoader } from 'react-spinners';
-import useLikePost from '@/hooks/useLikePost';
 import useComments from '@/hooks/useComments';
 import { renderSafeHTML } from '@/lib/renderSafeHTML';
 import CommentForm from '@/components/blog/CommentForm';
-import { toast } from 'react-toastify';
 import CommentDialog from '@/components/blog/CommentDialog';
 import BlogCard from '@/components/blog/BlogCard';
 import useBlogPosts from '@/hooks/useBlogPosts';
 import useUserProfileByEmail from '@/hooks/useUserProfileByEmail';
+import usePostLikeState from '@/hooks/usePostLikeState';
 
 const PostDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const postId = id ? parseInt(id) : undefined;
-  const navigate = useNavigate();
 
   const {
     data: post,
@@ -42,21 +39,6 @@ const PostDetailPage: React.FC = () => {
     enabled: !!post?.id,
     sortBy: 'recommended',
   });
-
-  const { isAuthenticated } = useAuth();
-
-  const { mutate } = useLikePost({ post });
-
-  const handleLikeClick = () => {
-    if (!isAuthenticated) {
-      toast.info('You must be logged in to give a like!');
-      navigate('/login');
-      return;
-    }
-    if (post?.id) {
-      mutate(post.id);
-    }
-  };
 
   const { data: commentsData } = useComments({
     postId: post?.id as number,
@@ -108,6 +90,8 @@ const PostDetailPage: React.FC = () => {
     );
   }
 
+  const { isLiked, likesCount, handleLikeClick } = usePostLikeState(post);
+
   return (
     <>
       <Navbar />
@@ -156,17 +140,17 @@ const PostDetailPage: React.FC = () => {
             className='group flex cursor-pointer items-center gap-1.5'
             onClick={handleLikeClick}
           >
-            {post.likedByUser ? (
+            {isLiked ? (
               <Icon
                 icon='mdi:like'
-                className='fill-primary-300 size-5 group-hover:scale-105'
+                className='text-primary-300 size-5 group-hover:scale-105'
               />
             ) : (
               <ThumbsUp className='group-hover:text-primary-300 size-5 text-neutral-600 group-hover:scale-105' />
             )}
 
             <span className='md:text-sm-regular text-xs-regular group-hover:text-primary-300 text-neutral-600'>
-              {post.likes}
+              {likesCount}
             </span>
           </div>
           <div
