@@ -128,7 +128,7 @@ const ProfilePage: React.FC = () => {
                   <h3 className='text-lg-bold md:display-xs-bold text-neutral-900'>
                     {!isUserPostsLoading && userPosts
                       ? `${userPosts.total} Post`
-                      : '(...)'}
+                      : 'Post'}
                   </h3>
                   <div className='h-[1px] w-full bg-neutral-300 md:hidden' />
                   <Link to='/write-post'>

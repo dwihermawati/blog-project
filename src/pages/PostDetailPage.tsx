@@ -19,6 +19,7 @@ import { toast } from 'react-toastify';
 import CommentDialog from '@/components/blog/CommentDialog';
 import BlogCard from '@/components/blog/BlogCard';
 import useBlogPosts from '@/hooks/useBlogPosts';
+import useUserProfileByEmail from '@/hooks/useUserProfileByEmail';
 
 const PostDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -63,6 +64,11 @@ const PostDetailPage: React.FC = () => {
   });
 
   const [isCommentDialogOpen, setCommentDialogOpen] = useState(false);
+
+  const { data: userProfile } = useUserProfileByEmail({
+    email: post?.author?.email ?? '',
+    enabled: !!post?.author?.email,
+  });
 
   if (isLoading) {
     return (
@@ -131,7 +137,7 @@ const PostDetailPage: React.FC = () => {
             className='group flex-start flex-shrink-0 cursor-pointer gap-2'
           >
             <AvatarDisplay
-              avatarUrl={post.author.avatarUrl}
+              avatarUrl={userProfile?.avatarUrl}
               displayName={post.author.name}
               className='size-10 group-hover:scale-105 group-hover:brightness-110'
             />

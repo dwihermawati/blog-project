@@ -28,6 +28,7 @@ import useComments from '@/hooks/useComments';
 import StatisticDialog from './StatisticDialog';
 import { toast } from 'react-toastify';
 import CommentDialog from './CommentDialog';
+import useUserProfileByEmail from '@/hooks/useUserProfileByEmail';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -73,6 +74,11 @@ const BlogCard: React.FC<BlogCardProps> = ({
   const handleCommentClick = () => {
     setCommentDialogOpen(true);
   };
+
+  const { data: userProfile } = useUserProfileByEmail({
+    email: post.author.email,
+    enabled: !!post.author.email,
+  });
 
   return (
     <div
@@ -202,7 +208,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
               className='group flex-start flex-shrink-0 cursor-pointer gap-2'
             >
               <AvatarDisplay
-                avatarUrl={post.author.avatarUrl}
+                avatarUrl={userProfile?.avatarUrl}
                 displayName={post.author.name}
                 style={{ width: generateClamp(30, 40, 1248) }}
                 className='aspect-square h-auto group-hover:scale-105 group-hover:brightness-110'

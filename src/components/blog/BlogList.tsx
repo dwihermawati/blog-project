@@ -4,6 +4,7 @@ import BlogCard from './BlogCard';
 import PaginationControls from '@/components/shared/PaginationControls';
 import EmptyState from '../shared/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
+import { BeatLoader } from 'react-spinners';
 
 interface BlogListEmptyStateProps {
   title: string;
@@ -100,7 +101,7 @@ const BlogList: React.FC<BlogListProps> = ({
         </h2>
       )}
 
-      {isPostsLoading && <div className='text-center'>Loading posts...</div>}
+      {isPostsLoading && <BeatLoader size={20} color='#0093DD' />}
       {isPostsError && (
         <div className='text-center text-[#EE1D52]'>
           Error loading posts: {postsError?.message}
