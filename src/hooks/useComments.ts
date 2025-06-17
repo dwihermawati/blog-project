@@ -1,4 +1,3 @@
-// src/hooks/useComments.ts
 import { useQuery } from '@tanstack/react-query';
 import blogService from '@/services/blogService';
 import { PostCommentsResponse } from '@/types/blog';

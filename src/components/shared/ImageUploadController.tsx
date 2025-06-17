@@ -57,13 +57,13 @@ export function ImageUploadController({
                     alt='Preview'
                     className='mx-auto max-h-[280px] object-cover'
                   />
-                  <div className='flex-center mt-3 gap-3'>
+                  <div className='flex-center mt-3 gap-3 max-sm:gap-2'>
                     <button
                       type='button'
                       onClick={() => inputRef.current?.click()}
-                      className='flex-center text-sm-regular h-10 rounded-lg border border-neutral-300 px-3 text-neutral-950 hover:bg-neutral-200'
+                      className='max-sm:text-xs-regular flex-center text-sm-regular h-10 rounded-lg border border-neutral-300 px-3 text-neutral-950 hover:bg-neutral-200 max-sm:px-1.5 max-sm:leading-5'
                     >
-                      <ArrowUpToLine className='mr-1.5 size-5' />
+                      <ArrowUpToLine className='mr-1.5 size-5 max-sm:mr-0.5 max-sm:size-4' />
                       Change Image
                     </button>
                     <button
@@ -73,9 +73,9 @@ export function ImageUploadController({
                         setPreviewUrl(null);
                         if (inputRef.current) inputRef.current.value = '';
                       }}
-                      className='flex-center text-sm-regular h-10 rounded-lg border border-neutral-300 px-3 text-[#EE1D52] hover:bg-neutral-200'
+                      className='max-sm:text-xs-regular flex-center text-sm-regular h-10 rounded-lg border border-neutral-300 px-3 text-[#EE1D52] hover:bg-neutral-200 max-sm:px-1.5 max-sm:leading-5'
                     >
-                      <Trash2 className='mr-1.5 size-5' />
+                      <Trash2 className='mr-1.5 size-5 max-sm:mr-0.5 max-sm:size-4' />
                       Delete Image
                     </button>
                   </div>

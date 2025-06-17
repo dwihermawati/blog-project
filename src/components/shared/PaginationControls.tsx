@@ -79,7 +79,10 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
       {paginationRange.map((page, index) => {
         if (page === '...') {
           return (
-            <span key={`dots-${index}`} className='px-4 text-neutral-900'>
+            <span
+              key={`dots-${index}`}
+              className='px-4 text-neutral-900 max-sm:px-1'
+            >
               ...
             </span>
           );
@@ -90,7 +93,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
             {typeof page === 'number' && (
               <div
                 key={`page-${page}-${index}`}
-                className='flex-center size-12 border-none'
+                className='flex-center border-none'
               >
                 <Button
                   variant={page === currentPage ? 'default' : 'icon'}

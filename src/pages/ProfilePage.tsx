@@ -39,8 +39,9 @@ const ProfilePage: React.FC = () => {
     userId: userProfile?.id,
     sortBy: 'myPosts',
     enabled: !!userProfile?.id && !!token,
-    queryKeyPrefix: ['myPosts-count', userProfile!.id?.toString()],
-    limit: 1,
+    queryKeyPrefix: userProfile?.id
+      ? ['myPosts-count', userProfile.id.toString()]
+      : [],
     token,
   });
 
@@ -141,7 +142,11 @@ const ProfilePage: React.FC = () => {
                 <BlogList
                   sortBy='myPosts'
                   userId={userProfile.id}
-                  queryKeyPrefix={['myPosts', userProfile.id.toString()]}
+                  queryKeyPrefix={
+                    userProfile?.id
+                      ? ['myPosts', userProfile.id.toString()]
+                      : []
+                  }
                   showTitle={false}
                   itemsPerPage={5}
                   cardVariant='user-blogpost'

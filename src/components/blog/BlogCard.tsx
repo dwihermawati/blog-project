@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { BlogPost } from '@/types/blog';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ThumbsUp, XIcon } from 'lucide-react';
+import { XIcon } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import AvatarDisplay from '../shared/AvatarDisplay';
 import useDeletePost from '@/hooks/useDeletePost';
@@ -27,7 +27,7 @@ import StatisticDialog from './StatisticDialog';
 import { toast } from 'react-toastify';
 import CommentDialog from './CommentDialog';
 import useUserProfileByEmail from '@/hooks/useUserProfileByEmail';
-import usePostLikeState from '@/hooks/usePostLikeState';
+import PostLikeButton from './PostLikeButton';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -48,8 +48,6 @@ const BlogCard: React.FC<BlogCardProps> = ({
       toast.error(`Failed to delete post: ${error.message}`);
     },
   });
-
-  const { isLiked, likesCount, handleLikeClick } = usePostLikeState(post);
 
   const { data: commentsData } = useComments({
     postId: post?.id as number,
@@ -108,7 +106,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
             </h2>
           </Link>
           {(variant === 'blogpost' || variant === 'user-blogpost') && (
-            <div className='flex items-center gap-2'>
+            <div className='flex w-full flex-wrap items-center gap-2'>
               {post.tags.map((tag, idx) => (
                 <div
                   key={idx}
@@ -129,7 +127,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
                 <p className='text-xs-regular text-neutral-700'>
                   Created {formatDateTime(post.createdAt)}
                 </p>
-                <div className='h-4 w-[1px] flex-shrink-0 bg-neutral-300' />
+                <div className='h-4 w-[1px] flex-shrink-0 bg-neutral-300 max-sm:h-9' />
                 <p className='text-xs-regular text-neutral-700'>
                   Last updated{' '}
                   {formatDateTime(post.updatedAt ?? post.createdAt)}
@@ -213,23 +211,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
         )}
         {(variant === 'blogpost' || variant === 'most-liked') && (
           <div className='flex items-center gap-3 md:gap-5'>
-            <div className='group flex cursor-pointer items-center gap-1.5'>
-              {isLiked ? (
-                <Icon
-                  icon='mdi:like'
-                  className='text-primary-300 size-5 scale-105'
-                  onClick={handleLikeClick}
-                />
-              ) : (
-                <ThumbsUp
-                  className='hover:text-primary-300 size-5 text-neutral-600 hover:scale-105'
-                  onClick={handleLikeClick}
-                />
-              )}
-              <span className='md:text-sm-regular text-xs-regular group-hover:text-primary-300 text-neutral-600'>
-                {likesCount}
-              </span>
-            </div>
+            <PostLikeButton post={post} />
             <div
               className='group flex cursor-pointer items-center gap-1.5'
               onClick={handleCommentClick}

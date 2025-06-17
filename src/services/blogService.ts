@@ -206,7 +206,7 @@ const blogService = {
       const formData = new FormData();
       formData.append('title', payload.title);
       formData.append('content', payload.content);
-      formData.append('tags', JSON.stringify(payload.tags));
+      payload.tags.forEach((tag) => formData.append('tags', tag));
       formData.append('image', payload.image);
 
       const response = await apiClient.post<BlogPost>('/posts', formData, {
@@ -240,7 +240,7 @@ const blogService = {
         formData.append('content', payload.content);
       }
       if (payload.tags !== undefined) {
-        formData.append('tags', JSON.stringify(payload.tags));
+        payload.tags.forEach((tag) => formData.append('tags', tag));
       }
       if (payload.image instanceof File) {
         formData.append('image', payload.image);

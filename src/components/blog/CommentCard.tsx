@@ -3,6 +3,7 @@ import { Comment } from '@/types/blog';
 import { formatDateTime } from '@/lib/formatDateTime';
 import AvatarDisplay from '@/components/shared/AvatarDisplay';
 import capitalizeName from '@/lib/capitalizeName';
+import { Link } from 'react-router-dom';
 
 interface CommentCardProps {
   comment: Comment;
@@ -11,21 +12,24 @@ interface CommentCardProps {
 const CommentCard: React.FC<CommentCardProps> = ({ comment }) => {
   return (
     <div className='flex flex-col gap-2 border-b border-neutral-300 pb-3 last:border-b-0 last:pb-0'>
-      <div className='flex items-center gap-2 md:gap-3'>
+      <Link
+        to={`/profile/${comment.author.email}`}
+        className='group flex cursor-pointer items-center gap-2 md:gap-3'
+      >
         <AvatarDisplay
           avatarUrl={comment.author.avatarUrl}
           displayName={comment.author.name}
-          className='size-10 md:size-12'
+          className='size-10 group-hover:scale-105 md:size-12'
         />
         <div className='flex flex-col gap-[-4px]'>
-          <span className='text-xs-semibold md:text-sm-semibold text-neutral-900'>
+          <span className='text-xs-semibold md:text-sm-semibold group-hover:text-primary-300 text-neutral-900'>
             {capitalizeName(comment.author.name)}
           </span>
           <span className='text-xs-regular md:text-sm-regular text-neutral-600'>
             {formatDateTime(comment.createdAt, false)}
           </span>
         </div>
-      </div>
+      </Link>
       <p className='text-xs-regular md:text-sm-regular text-neutral-900'>
         {comment.content}
       </p>
