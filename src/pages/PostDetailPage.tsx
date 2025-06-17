@@ -72,7 +72,7 @@ const PostDetailPage: React.FC = () => {
             <h1 className='md:display-lg-bold display-sm-bold text-neutral-900'>
               {post.title}
             </h1>
-            <div className='flex items-center gap-2'>
+            <div className='flex w-full flex-wrap items-center gap-2'>
               {post.tags.map((tag, idx) => (
                 <div
                   key={idx}
