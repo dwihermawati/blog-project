@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Icon } from '@iconify/react';
 import { useAuth } from '@/contexts/AuthContext';
-import useUser from '@/hooks/useUser';
+import useUser from '@/hooks/useGetUserByEmail';
 import capitalizeName from '@/lib/capitalizeName';
 import AvatarDisplay from '../shared/AvatarDisplay';
 

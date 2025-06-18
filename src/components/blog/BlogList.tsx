@@ -21,7 +21,7 @@ interface BlogListProps {
   itemsPerPage?: number;
   searchQuery?: string;
   userId?: number;
-  sortBy?: 'recommended' | 'most-liked' | 'search' | 'myPosts';
+  sortBy?: 'recommended' | 'most-liked' | 'search' | 'myPosts' | 'userId';
   showTitle?: boolean;
   titleText?: string;
   cardVariant?: 'blogpost' | 'most-liked' | 'user-blogpost';

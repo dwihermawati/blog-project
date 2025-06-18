@@ -1,8 +1,9 @@
 import DOMPurify from 'dompurify';
 import { $generateHtmlFromNodes } from '@lexical/html';
 import { createEditor } from 'lexical';
+import { editorCoreConfig } from '@/components/editor/editorConfig';
 
-const editor = createEditor();
+const editor = createEditor(editorCoreConfig);
 
 function isLexicalJson(str: string): boolean {
   try {

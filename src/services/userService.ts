@@ -15,7 +15,7 @@ const userService = {
   ): Promise<UserProfileResponse> => {
     try {
       const response = await apiClient.get<UserProfileResponse>(
-        `/users/${email}`,
+        `/users/by-email/${email}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -29,6 +29,23 @@ const userService = {
         throw new Error(
           apiError.message || `Failed to fetch user data: ${email}`
         );
+      } else {
+        throw new Error(
+          error.message ||
+            'Failed to retrieve user data: Failed to connect to server'
+        );
+      }
+    }
+  },
+
+  getUserById: async (id: number): Promise<UserProfileResponse> => {
+    try {
+      const response = await apiClient.get<UserProfileResponse>(`/users/${id}`);
+      return response.data;
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        const apiError: ApiErrorResponse = error.response.data;
+        throw new Error(apiError.message || `Failed to fetch user data: ${id}`);
       } else {
         throw new Error(
           error.message ||

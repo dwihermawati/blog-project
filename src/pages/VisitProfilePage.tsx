@@ -1,24 +1,52 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { generateClamp } from '@/function/generate-clamp';
-import AvatarDisplay from '@/components/shared/AvatarDisplay';
+import AvatarDisplay, {
+  getFullAvatarUrl,
+} from '@/components/shared/AvatarDisplay';
 import capitalizeName from '@/lib/capitalizeName';
 import { BeatLoader } from 'react-spinners';
 import BlogList from '@/components/blog/BlogList';
 import Navbar from '@/components/common/Navbar';
 import { Footer } from '@/components/common/Footer';
-import useUserProfileByEmail from '@/hooks/useUserProfileByEmail';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { XIcon } from 'lucide-react';
+import useUserProfileByID from '@/hooks/useGetUserProfileById';
+import useBlogPosts from '@/hooks/useBlogPosts';
 
 const VisitProfilePage: React.FC = () => {
-  const { email } = useParams<{ email: string }>();
-  const userEmail = email || '';
+  const { id } = useParams<{ id: string }>();
+
+  const numericId = Number(id);
+  const isValidId = !isNaN(numericId);
 
   const {
     data: userProfile,
     isLoading: isProfileLoading,
     isError: isProfileError,
     error: profileError,
-  } = useUserProfileByEmail({ email: userEmail, enabled: !!userEmail });
+  } = useUserProfileByID({ id: numericId, enabled: isValidId });
+
+  const { data: userPosts, isLoading: isUserPostsLoading } = useBlogPosts({
+    userId: userProfile?.id,
+    sortBy: 'userId',
+    enabled: !!userProfile?.id,
+    queryKeyPrefix: userProfile?.id
+      ? ['userIdPosts-count', userProfile.id.toString()]
+      : [],
+  });
+
+  const [isShowAvatarDialogOpen, setIsShowAvatarDialogOpen] = useState(false);
+
+  const handleAvatarClick = () => {
+    setIsShowAvatarDialogOpen(true);
+  };
 
   return (
     <>
@@ -35,8 +63,7 @@ const VisitProfilePage: React.FC = () => {
         ) : isProfileError || !userProfile ? (
           <p className='text-center text-[#EE1D52]'>
             Error:{' '}
-            {profileError?.message ||
-              `Failed to load profile for ${userEmail}.`}
+            {profileError?.message || `Failed to load profile for ${id}.`}
           </p>
         ) : (
           <>
@@ -45,7 +72,8 @@ const VisitProfilePage: React.FC = () => {
                 avatarUrl={userProfile.avatarUrl}
                 displayName={userProfile.name}
                 style={{ width: generateClamp(40, 80, 1248) }}
-                className='aspect-square h-auto'
+                className='aspect-square h-auto cursor-pointer hover:scale-105 hover:brightness-110'
+                onClick={handleAvatarClick}
               />
               <div>
                 <p
@@ -71,7 +99,14 @@ const VisitProfilePage: React.FC = () => {
               </div>
             </div>
 
+            <h3 className='text-lg-bold md:display-xs-bold text-neutral-900'>
+              {!isUserPostsLoading && userPosts
+                ? `${userPosts.total} Post`
+                : 'Post'}
+            </h3>
+
             <BlogList
+              sortBy='userId'
               userId={userProfile.id}
               queryKeyPrefix={['userPosts', userProfile.id.toString()]}
               showTitle={false}
@@ -81,11 +116,40 @@ const VisitProfilePage: React.FC = () => {
               emptyStateConfig={{
                 title: 'No posts from this user yet',
                 description: 'Stay tuned for future posts',
+                className: 'md:mt-[152px] md:mb-[341px] mt-[143px] mb-[254px]',
               }}
             />
           </>
         )}
       </main>
+      {userProfile && (
+        <Dialog
+          open={isShowAvatarDialogOpen}
+          onOpenChange={setIsShowAvatarDialogOpen}
+        >
+          <DialogContent className='max-h-160 max-w-[612px]'>
+            <DialogHeader className='flex items-center justify-between'>
+              <DialogTitle className='text-lg-bold'>
+                {capitalizeName(userProfile.name)}
+              </DialogTitle>
+              <DialogClose asChild>
+                <XIcon className='size-6 cursor-pointer text-neutral-950 hover:text-neutral-500' />
+              </DialogClose>
+            </DialogHeader>
+            {userProfile.avatarUrl ? (
+              <img
+                src={getFullAvatarUrl(userProfile.avatarUrl)}
+                alt={`${userProfile.name}'s avatar`}
+                className='mx-auto mt-4 max-h-130 w-auto rounded-xl'
+              />
+            ) : (
+              <p className='text-sm-semibold text-center text-neutral-500'>
+                No avatar found
+              </p>
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
       <Footer />
     </>
   );

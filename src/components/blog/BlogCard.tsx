@@ -26,8 +26,8 @@ import useComments from '@/hooks/useComments';
 import StatisticDialog from './StatisticDialog';
 import { toast } from 'react-toastify';
 import CommentDialog from './CommentDialog';
-import useUserProfileByEmail from '@/hooks/useUserProfileByEmail';
 import PostLikeButton from './PostLikeButton';
+import useUserProfileByID from '@/hooks/useGetUserProfileById';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -61,9 +61,9 @@ const BlogCard: React.FC<BlogCardProps> = ({
     setCommentDialogOpen(true);
   };
 
-  const { data: userProfile } = useUserProfileByEmail({
-    email: post.author.email,
-    enabled: !!post.author.email,
+  const { data: userProfile } = useUserProfileByID({
+    id: post.author.id,
+    enabled: !!post.author.id,
   });
 
   return (
@@ -190,7 +190,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
         {variant === 'blogpost' && (
           <div className='flex items-center gap-3'>
             <Link
-              to={`/profile/${post.author.email}`}
+              to={`/profile/${post.author.id}`}
               className='group flex-start flex-shrink-0 cursor-pointer gap-2'
             >
               <AvatarDisplay

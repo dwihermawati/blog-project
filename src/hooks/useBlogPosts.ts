@@ -7,7 +7,7 @@ interface UseBlogPostsParams {
   limit?: number;
   search?: string;
   userId?: number;
-  sortBy?: 'recommended' | 'most-liked' | 'search' | 'myPosts';
+  sortBy?: 'recommended' | 'most-liked' | 'search' | 'myPosts' | 'userId';
   token?: string;
   enabled?: boolean;
   queryKeyPrefix?: string[];

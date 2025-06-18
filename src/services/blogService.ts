@@ -18,7 +18,7 @@ interface GetPostsParams {
   page?: number;
   search?: string;
   userId?: number;
-  sortBy?: 'recommended' | 'most-liked' | 'search' | 'myPosts';
+  sortBy?: 'recommended' | 'most-liked' | 'search' | 'myPosts' | 'userId';
   token?: string;
 }
 
@@ -52,6 +52,8 @@ const blogService = {
       if (params.search && params.search.trim() !== '') {
         requestParams.query = params.search;
       }
+    } else if (params?.sortBy === 'userId' && params?.userId) {
+      path = `/posts/by-user/${params.userId}`;
     }
 
     try {

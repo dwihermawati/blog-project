@@ -15,8 +15,8 @@ import CommentForm from '@/components/blog/CommentForm';
 import CommentDialog from '@/components/blog/CommentDialog';
 import BlogCard from '@/components/blog/BlogCard';
 import useBlogPosts from '@/hooks/useBlogPosts';
-import useUserProfileByEmail from '@/hooks/useUserProfileByEmail';
 import PostLikeButton from '@/components/blog/PostLikeButton';
+import useGetUserProfileById from '@/hooks/useGetUserProfileById';
 
 const PostDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -46,9 +46,9 @@ const PostDetailPage: React.FC = () => {
 
   const [isCommentDialogOpen, setCommentDialogOpen] = useState(false);
 
-  const { data: userProfile } = useUserProfileByEmail({
-    email: post?.author?.email ?? '',
-    enabled: !!post?.author?.email,
+  const { data: userProfile } = useGetUserProfileById({
+    id: post?.author?.id as number,
+    enabled: !!post?.author?.id,
   });
 
   return (
@@ -84,7 +84,7 @@ const PostDetailPage: React.FC = () => {
             </div>
             <div className='flex items-center gap-3'>
               <Link
-                to={`/profile/${post.author.email}`}
+                to={`/profile/${post.author.id}`}
                 className='group flex-start flex-shrink-0 cursor-pointer gap-2'
               >
                 <AvatarDisplay

@@ -23,7 +23,7 @@ function App() {
           <Route path='/register' element={<RegisterPage />} />
           <Route path='/search' element={<SearchResultsPage />} />
           <Route path='/posts/:id' element={<PostDetailPage />} />
-          <Route path='/profile/:email' element={<VisitProfilePage />} />
+          <Route path='/profile/:id' element={<VisitProfilePage />} />
           <Route path='/profile' element={<ProfilePage />} />
           <Route path='/write-post' element={<CreateBlogPostPage />} />
           <Route path='/edit-post/:id' element={<EditBlogPostPage />} />

@@ -12,7 +12,7 @@ import CommentCard from './CommentCard';
 import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import useCreateComment from '@/hooks/useCreateComment';
 import useComments from '@/hooks/useComments';
-import useUser from '@/hooks/useUser';
+import useUser from '@/hooks/useGetUserByEmail';
 import { useAuth } from '@/contexts/AuthContext';
 import capitalizeName from '@/lib/capitalizeName';
 import { toast } from 'react-toastify';

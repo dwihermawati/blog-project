@@ -11,7 +11,7 @@ interface LikeCardProps {
 const LikeCard: React.FC<LikeCardProps> = ({ user }) => {
   return (
     <Link
-      to={`/profile/${user.email}`}
+      to={`/profile/${user.id}`}
       className='flex items-center gap-3 rounded-md border-b border-neutral-300 p-2 pb-3 transition-colors last:border-b-0 last:pb-0 hover:bg-neutral-100'
     >
       <AvatarDisplay

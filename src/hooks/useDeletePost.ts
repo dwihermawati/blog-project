@@ -82,12 +82,14 @@ const useDeletePost = (options?: UseDeletePostOptions) => {
       );
       options?.onError?.(err);
     },
+    onSuccess: (_, __, ___) => {
+      options?.onSuccess?.();
+    },
     onSettled: (postIdToDelete) => {
       queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
       queryClient.invalidateQueries({
         queryKey: ['postDetail', postIdToDelete],
       });
-      options?.onSuccess?.();
     },
   });
 };

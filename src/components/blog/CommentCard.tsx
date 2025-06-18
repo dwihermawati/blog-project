@@ -13,7 +13,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ comment }) => {
   return (
     <div className='flex flex-col gap-2 border-b border-neutral-300 pb-3 last:border-b-0 last:pb-0'>
       <Link
-        to={`/profile/${comment.author.email}`}
+        to={`/profile/${comment.author.id}`}
         className='group flex cursor-pointer items-center gap-2 md:gap-3'
       >
         <AvatarDisplay

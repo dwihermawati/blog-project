@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { useDropzone } from 'react-dropzone';
 import { Icon } from '@iconify/react';
 import { Label } from '@/components/ui/label';
 import { FormControl, FormItem, FormMessage } from '@/components/ui/form';
@@ -22,34 +23,60 @@ export function ImageUploadController({
   initialPreviewUrl,
 }: ImageUploadControllerProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const { watch, setValue } = useFormContext();
+  const imageFile = watch(name);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
-    initialPreviewUrl ?? null
+    imageFile instanceof File
+      ? URL.createObjectURL(imageFile)
+      : (initialPreviewUrl ?? null)
   );
 
-  const { watch } = useFormContext();
-  const imageFile = watch(name);
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
+      if (file) {
+        setValue(name, file, { shouldValidate: true });
+        const objectUrl = URL.createObjectURL(file);
+        setPreviewUrl(objectUrl);
+      }
+    },
+    [name, setValue]
+  );
 
-  useEffect(() => {
-    if (imageFile instanceof File) {
-      const objectUrl = URL.createObjectURL(imageFile);
-      setPreviewUrl(objectUrl);
-      return () => URL.revokeObjectURL(objectUrl);
-    } else if (initialPreviewUrl) {
-      setPreviewUrl(initialPreviewUrl);
-    } else {
-      setPreviewUrl(null);
-    }
-  }, [imageFile, initialPreviewUrl]);
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+    onDrop,
+    accept: {
+      'image/png': [],
+      'image/jpeg': [],
+      'image/jpg': [],
+    },
+    multiple: false,
+    disabled,
+    noKeyboard: true,
+    noClick: false,
+  });
+
+  const handleDelete = () => {
+    setValue(name, null, { shouldValidate: true });
+    setPreviewUrl(null);
+    if (inputRef.current) inputRef.current.value = '';
+  };
 
   return (
     <Controller
       control={control}
       name={name}
-      render={({ field, fieldState }) => (
+      render={({ fieldState }) => (
         <FormItem>
           <Label>Cover Image</Label>
           <FormControl>
             <div>
+              <input
+                {...getInputProps({ refKey: 'ref' })}
+                aria-invalid={!!fieldState.error}
+                className='hidden'
+              />
+
               {previewUrl ? (
                 <div className='relative overflow-hidden rounded-xl border border-dashed border-neutral-400 bg-neutral-50 px-6 py-4'>
                   <img
@@ -60,7 +87,7 @@ export function ImageUploadController({
                   <div className='flex-center mt-3 gap-3 max-sm:gap-2'>
                     <button
                       type='button'
-                      onClick={() => inputRef.current?.click()}
+                      onClick={open}
                       className='max-sm:text-xs-regular flex-center text-sm-regular h-10 rounded-lg border border-neutral-300 px-3 text-neutral-950 hover:bg-neutral-200 max-sm:px-1.5 max-sm:leading-5'
                     >
                       <ArrowUpToLine className='mr-1.5 size-5 max-sm:mr-0.5 max-sm:size-4' />
@@ -68,11 +95,7 @@ export function ImageUploadController({
                     </button>
                     <button
                       type='button'
-                      onClick={() => {
-                        field.onChange(null);
-                        setPreviewUrl(null);
-                        if (inputRef.current) inputRef.current.value = '';
-                      }}
+                      onClick={handleDelete}
                       className='max-sm:text-xs-regular flex-center text-sm-regular h-10 rounded-lg border border-neutral-300 px-3 text-[#EE1D52] hover:bg-neutral-200 max-sm:px-1.5 max-sm:leading-5'
                     >
                       <Trash2 className='mr-1.5 size-5 max-sm:mr-0.5 max-sm:size-4' />
@@ -84,12 +107,14 @@ export function ImageUploadController({
                   </p>
                 </div>
               ) : (
-                <label
-                  htmlFor='image-upload'
-                  className={cn(
-                    'flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-neutral-400 bg-neutral-50 px-6 py-4 text-center transition hover:cursor-pointer',
-                    fieldState.error && 'border-destructive'
-                  )}
+                <div
+                  {...getRootProps({
+                    className: cn(
+                      'flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-neutral-400 bg-neutral-50 px-6 py-4 text-center transition cursor-pointer group',
+                      isDragActive && 'bg-neutral-100',
+                      fieldState.error && 'border-destructive'
+                    ),
+                  })}
                 >
                   <div className='flex-center size-10 rounded-md border border-neutral-300'>
                     <Icon
@@ -98,35 +123,18 @@ export function ImageUploadController({
                     />
                   </div>
                   <div>
-                    <p className='text-sm-semibold text-primary-300'>
+                    <span className='text-sm-semibold text-primary-300 group-hover:underline group-hover:underline-offset-3'>
                       Click to upload{' '}
-                      <span className='text-sm-regular text-neutral-700'>
-                        or drag and drop
-                      </span>
-                    </p>
+                    </span>
+                    <span className='text-sm-regular text-neutral-700'>
+                      or drag and drop
+                    </span>
                     <p className='text-xs-regular mt-1 text-neutral-700'>
                       PNG or JPG (max. 5mb)
                     </p>
                   </div>
-                </label>
+                </div>
               )}
-              <input
-                id='image-upload'
-                ref={inputRef}
-                type='file'
-                accept='image/png, image/jpeg, image/jpg'
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    field.onChange(file);
-                  } else {
-                    inputRef.current && (inputRef.current.value = '');
-                  }
-                }}
-                className='hidden'
-                disabled={disabled}
-                aria-invalid={!!fieldState.error}
-              />
             </div>
           </FormControl>
           <FormMessage />

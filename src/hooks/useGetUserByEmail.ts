@@ -3,7 +3,7 @@ import userService from '@/services/userService';
 import { UserProfileResponse } from '@/types/user';
 import { useAuth } from '@/contexts/AuthContext';
 
-const useUser = () => {
+const useGetUserByEmail = () => {
   const { token, user: authUser } = useAuth();
 
   const queryResult = useQuery<UserProfileResponse, Error>({
@@ -27,4 +27,4 @@ const useUser = () => {
   };
 };
 
-export default useUser;
+export default useGetUserByEmail;

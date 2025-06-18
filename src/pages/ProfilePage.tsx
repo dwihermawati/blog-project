@@ -1,8 +1,10 @@
 import { Footer } from '@/components/common/Footer';
 import Navbar from '@/components/common/Navbar';
-import AvatarDisplay from '@/components/shared/AvatarDisplay';
+import AvatarDisplay, {
+  getFullAvatarUrl,
+} from '@/components/shared/AvatarDisplay';
 import { generateClamp } from '@/function/generate-clamp';
-import useUser from '@/hooks/useUser';
+import useUser from '@/hooks/useGetUserByEmail';
 import capitalizeName from '@/lib/capitalizeName';
 import React, { useState } from 'react';
 import { BeatLoader } from 'react-spinners';
@@ -45,6 +47,12 @@ const ProfilePage: React.FC = () => {
     token,
   });
 
+  const [isShowAvatarDialogOpen, setIsShowAvatarDialogOpen] = useState(false);
+
+  const handleAvatarClick = () => {
+    setIsShowAvatarDialogOpen(true);
+  };
+
   return (
     <>
       <Navbar />
@@ -69,7 +77,8 @@ const ProfilePage: React.FC = () => {
                   avatarUrl={userProfile.avatarUrl}
                   displayName={userProfile.name}
                   style={{ width: generateClamp(40, 80, 1248) }}
-                  className='aspect-square h-auto'
+                  className='aspect-square h-auto cursor-pointer hover:scale-105 hover:brightness-110'
+                  onClick={handleAvatarClick}
                 />
                 <div>
                   <p
@@ -171,6 +180,34 @@ const ProfilePage: React.FC = () => {
           </>
         )}
       </main>
+      {userProfile && (
+        <Dialog
+          open={isShowAvatarDialogOpen}
+          onOpenChange={setIsShowAvatarDialogOpen}
+        >
+          <DialogContent className='max-h-160 max-w-[612px]'>
+            <DialogHeader className='flex items-center justify-between'>
+              <DialogTitle className='text-lg-bold'>
+                {capitalizeName(userProfile.name)}
+              </DialogTitle>
+              <DialogClose asChild>
+                <XIcon className='size-6 cursor-pointer text-neutral-950 hover:text-neutral-500' />
+              </DialogClose>
+            </DialogHeader>
+            {userProfile.avatarUrl ? (
+              <img
+                src={getFullAvatarUrl(userProfile.avatarUrl)}
+                alt={`${userProfile.name}'s avatar`}
+                className='mx-auto mt-4 max-h-130 w-auto rounded-xl'
+              />
+            ) : (
+              <p className='text-sm-semibold text-center text-neutral-500'>
+                No avatar found
+              </p>
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
       <Footer />
     </>
   );

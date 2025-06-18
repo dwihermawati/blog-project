@@ -12,7 +12,7 @@ interface AvatarDisplayProps {
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const getFullAvatarUrl = (url?: string | null): string | undefined => {
+export const getFullAvatarUrl = (url?: string | null): string | undefined => {
   if (!url) return undefined;
   return url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
 };
@@ -27,6 +27,7 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
   const hasAvatar = !!avatarUrl;
   const initial = getInitials(displayName);
   const bgColor = getColorAvatar(displayName);
+  const [imageError, setImageError] = useState(false);
 
   const avatarRef = useRef<HTMLDivElement>(null);
   const [avatarSize, setAvatarSize] = useState(0);
@@ -58,11 +59,12 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
       style={style}
       onClick={onClick}
     >
-      {hasAvatar ? (
+      {hasAvatar && !imageError ? (
         <img
           src={getFullAvatarUrl(avatarUrl)}
           alt={displayName}
           className='size-full rounded-full border border-neutral-300 object-cover'
+          onError={() => setImageError(true)}
         />
       ) : (
         <div
