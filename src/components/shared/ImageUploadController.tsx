@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { FormControl, FormItem, FormMessage } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
 import { ArrowUpToLine, Trash2 } from 'lucide-react';
+import { ImagePlus } from 'lucide-react';
 
 interface ImageUploadControllerProps {
   control: any;
@@ -38,6 +39,7 @@ export function ImageUploadController({
         setValue(name, file, { shouldValidate: true });
         const objectUrl = URL.createObjectURL(file);
         setPreviewUrl(objectUrl);
+        setImageError(false);
       }
     },
     [name, setValue]
@@ -59,8 +61,11 @@ export function ImageUploadController({
   const handleDelete = () => {
     setValue(name, null, { shouldValidate: true });
     setPreviewUrl(null);
+    setImageError(false);
     if (inputRef.current) inputRef.current.value = '';
   };
+
+  const [imageError, setImageError] = useState(false);
 
   return (
     <Controller
@@ -79,11 +84,28 @@ export function ImageUploadController({
 
               {previewUrl ? (
                 <div className='relative overflow-hidden rounded-xl border border-dashed border-neutral-400 bg-neutral-50 px-6 py-4'>
-                  <img
-                    src={previewUrl}
-                    alt='Preview'
-                    className='mx-auto max-h-[280px] object-cover'
-                  />
+                  {!imageError ? (
+                    <img
+                      src={previewUrl}
+                      alt='Preview'
+                      className='mx-auto max-h-[280px] object-cover'
+                      onError={() => setImageError(true)}
+                    />
+                  ) : (
+                    <div className='mx-auto max-w-50'>
+                      <ImagePlus
+                        // {...getRootProps({
+                        className='hover:text-primary-200 size-full cursor-pointer object-cover text-neutral-500'
+                        onClick={open}
+
+                        // })}
+                      />
+                      <p className='text-sm-regular text-center leading-5 text-neutral-500'>
+                        Image not found, please add or change image!!
+                      </p>
+                    </div>
+                  )}
+
                   <div className='flex-center mt-3 gap-3 max-sm:gap-2'>
                     <button
                       type='button'

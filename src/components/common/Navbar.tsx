@@ -1,6 +1,6 @@
 import { generateClamp } from '@/function/generate-clamp';
 import { motion, useScroll, useTransform } from 'motion/react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '@/assets/images/logo.png';
 import { ArrowLeft, Search } from 'lucide-react';
@@ -79,6 +79,19 @@ const Navbar: React.FC<NavbarProps> = ({ variant = 'default' }) => {
       setSearchInputValue('');
     }
   }, [location]);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+
+    if (isMobileSearchBarOpen) {
+      timeout = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 300);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [isMobileSearchBarOpen]);
 
   return (
     <>
@@ -286,6 +299,7 @@ const Navbar: React.FC<NavbarProps> = ({ variant = 'default' }) => {
               onClick={handleSearch}
             />
             <input
+              ref={inputRef}
               type='text'
               placeholder='Search'
               className='text-sm-regular w-full text-neutral-950 outline-none placeholder:text-neutral-500'

@@ -14,12 +14,20 @@ interface UseDeletePostOptions {
 
 interface DeletePostContext {
   previousBlogLists?: Array<[QueryKey, BlogListResponse | undefined]>;
+  previousMyPostsLists?: Array<[QueryKey, BlogListResponse | undefined]>;
   previousPostDetail?: BlogPost | undefined;
 }
 
 const useDeletePost = (options?: UseDeletePostOptions) => {
   const queryClient = useQueryClient();
   const { token } = useAuth();
+  const rollbackQueryList = (
+    list: Array<[QueryKey, BlogListResponse | undefined]> | undefined
+  ) => {
+    list?.forEach(([key, data]) => {
+      queryClient.setQueryData(key, data);
+    });
+  };
 
   return useMutation<
     DeletePostSuccessResponse,
@@ -33,6 +41,7 @@ const useDeletePost = (options?: UseDeletePostOptions) => {
     },
     onMutate: async (postIdToDelete) => {
       await queryClient.cancelQueries({ queryKey: ['blogPosts'] });
+      await queryClient.cancelQueries({ queryKey: ['myPosts'] });
       await queryClient.cancelQueries({
         queryKey: ['postDetail', postIdToDelete],
       });
@@ -40,6 +49,11 @@ const useDeletePost = (options?: UseDeletePostOptions) => {
       const previousBlogLists = queryClient.getQueriesData<BlogListResponse>({
         queryKey: ['blogPosts'],
       });
+      const previousMyPostsLists = queryClient.getQueriesData<BlogListResponse>(
+        {
+          queryKey: ['myPosts'],
+        }
+      );
 
       const previousPostDetail = queryClient.getQueryData<BlogPost>([
         'postDetail',
@@ -63,30 +77,43 @@ const useDeletePost = (options?: UseDeletePostOptions) => {
         }
       );
 
+      queryClient.setQueriesData<BlogListResponse | undefined>(
+        { queryKey: ['myPosts'] },
+        (old) =>
+          old
+            ? {
+                ...old,
+                data: old.data.filter((post) => post.id !== postIdToDelete),
+                total: Math.max(old.total - 1, 0),
+              }
+            : old
+      );
+
       queryClient.setQueryData<BlogPost | undefined>(
         ['postDetail', postIdToDelete],
         undefined
       );
 
-      return { previousBlogLists, previousPostDetail };
+      return { previousBlogLists, previousPostDetail, previousMyPostsLists };
     },
+
     onError: (err, postIdToDelete, context) => {
-      if (context?.previousBlogLists) {
-        context.previousBlogLists.forEach(([key, data]) => {
-          queryClient.setQueryData(key, data);
-        });
-      }
+      rollbackQueryList(context?.previousBlogLists);
+      rollbackQueryList(context?.previousMyPostsLists);
       queryClient.setQueryData(
         ['postDetail', postIdToDelete],
         context?.previousPostDetail
       );
       options?.onError?.(err);
     },
+
     onSuccess: (_, __, ___) => {
       options?.onSuccess?.();
     },
+
     onSettled: (postIdToDelete) => {
       queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['myPosts'] });
       queryClient.invalidateQueries({
         queryKey: ['postDetail', postIdToDelete],
       });

@@ -77,6 +77,20 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
     });
 
   const onSubmit = (data: z.infer<typeof editProfileSchema>) => {
+    const isNameUnchanged = data.name === currentUserProfile.name;
+    const isHeadlineUnchanged =
+      (data.headline ?? '') === (currentUserProfile.headline ?? '');
+    const isAvatarUnchanged = !data.avatar;
+
+    const isUnchanged =
+      isNameUnchanged && isHeadlineUnchanged && isAvatarUnchanged;
+
+    if (isUnchanged) {
+      toast.info('No changes to update.');
+      onUpdateSuccess?.();
+      return;
+    }
+
     const payload: UpdateProfilePayload = {
       name: data.name,
       headline: data.headline === '' ? null : data.headline,

@@ -15,7 +15,7 @@ export const Footer: React.FC = () => {
             lineHeight: generateClamp(24, 28, 1248),
           }}
         >
-          © 2025 Web Programming Hack Blog All rights reserved.
+          © 2025 Dwi Hermawati Blog All rights reserved.
         </p>
       </div>
     </footer>

@@ -14,9 +14,11 @@ const buttonVariants = cva(
         secondary:
           'bg-[#EE1D52] text-sm-semibold text-neutral-25 rounded-full hover:shadow-[0_0_17px_rgba(238, 29, 82, 0.6)]',
         icon: 'rounded-full border-none',
+        outline: 'border border-neutral-300 rounded-sm',
       },
       size: {
         default: 'h-11 px-14.5',
+        outline: 'h-8 px-2',
         icon: 'size-6',
       },
     },

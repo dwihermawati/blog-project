@@ -28,6 +28,7 @@ import { toast } from 'react-toastify';
 import CommentDialog from './CommentDialog';
 import PostLikeButton from './PostLikeButton';
 import useUserProfileByID from '@/hooks/useGetUserProfileById';
+import imageDefaultError from '@/assets/images/defaultImageIfError.png';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -66,6 +67,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
     enabled: !!post.author.id,
   });
 
+  const [imageError, setImageError] = useState(false);
   return (
     <div
       className={cn(
@@ -79,11 +81,20 @@ const BlogCard: React.FC<BlogCardProps> = ({
           to={`/posts/${post.id}`}
           className='h-64.5 w-85 shrink-0 cursor-pointer overflow-hidden rounded-sm border border-neutral-200 hover:scale-101 max-md:hidden'
         >
-          <img
-            src={post.imageUrl}
-            alt={post.title}
-            className='size-full object-cover'
-          />
+          {!imageError ? (
+            <img
+              src={post.imageUrl}
+              alt={post.title}
+              className='size-full object-cover'
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <img
+              src={imageDefaultError}
+              alt='Default Image'
+              className='size-full object-cover'
+            />
+          )}
         </Link>
       )}
       <div className='flex flex-1 flex-col gap-3 md:gap-4'>

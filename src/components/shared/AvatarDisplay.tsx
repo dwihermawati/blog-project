@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect, useState } from 'react';
+import React, { useRef, useLayoutEffect, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import getColorAvatar from '@/lib/getColorAvatar';
 import getInitials from '@/lib/getInitials';
@@ -14,7 +14,9 @@ interface AvatarDisplayProps {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export const getFullAvatarUrl = (url?: string | null): string | undefined => {
   if (!url) return undefined;
-  return url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+  return url.startsWith('http') || url.startsWith('blob:')
+    ? url
+    : `${API_BASE_URL}${url}`;
 };
 
 const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
@@ -48,6 +50,10 @@ const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
     };
   }, [className, style]);
   const fontSizeCalc = avatarSize > 0 ? `${avatarSize * 0.4}px` : '1rem';
+
+  useEffect(() => {
+    setImageError(false);
+  }, [avatarUrl]);
 
   return (
     <div

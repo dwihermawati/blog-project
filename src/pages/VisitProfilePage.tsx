@@ -19,6 +19,7 @@ import {
 import { XIcon } from 'lucide-react';
 import useUserProfileByID from '@/hooks/useGetUserProfileById';
 import useBlogPosts from '@/hooks/useBlogPosts';
+import { CircleUserRound } from 'lucide-react';
 
 const VisitProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +44,7 @@ const VisitProfilePage: React.FC = () => {
   });
 
   const [isShowAvatarDialogOpen, setIsShowAvatarDialogOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const handleAvatarClick = () => {
     setIsShowAvatarDialogOpen(true);
@@ -137,11 +139,16 @@ const VisitProfilePage: React.FC = () => {
               </DialogClose>
             </DialogHeader>
             {userProfile.avatarUrl ? (
-              <img
-                src={getFullAvatarUrl(userProfile.avatarUrl)}
-                alt={`${userProfile.name}'s avatar`}
-                className='mx-auto mt-4 max-h-130 w-auto rounded-xl'
-              />
+              !imageError ? (
+                <img
+                  src={getFullAvatarUrl(userProfile.avatarUrl)}
+                  alt={`${userProfile.name}'s avatar`}
+                  className='mx-auto mt-4 max-h-130 w-auto rounded-xl'
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <CircleUserRound className='mx-auto aspect-square h-auto w-25 object-cover text-neutral-500' />
+              )
             ) : (
               <p className='text-sm-semibold text-center text-neutral-500'>
                 No avatar found

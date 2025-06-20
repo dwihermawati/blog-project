@@ -11,7 +11,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { BeatLoader } from 'react-spinners';
 import useCreatePost from '@/hooks/useCreatePost';
 import { CreatePostPayload } from '@/types/blog';
@@ -20,15 +19,35 @@ import { Label } from '@/components/ui/label';
 import { ImageUploadController } from '../shared/ImageUploadController';
 import { useAnimation, motion } from 'motion/react';
 import { toast } from 'react-toastify';
+import Editor from '../editor/Editor';
 
 const createPostSchema = z.object({
   title: z
     .string()
     .min(1, 'Title is required.')
     .max(100, 'Maximum title 100 characters.'),
-  content: z
-    .string()
-    .min(10, 'Content is required and must be at least 10 characters.'),
+  content: z.string().refine(
+    (val) => {
+      try {
+        const json = JSON.parse(val);
+        const extractText = (node: any): string => {
+          if (!node) return '';
+          if (node.text) return node.text;
+          if (Array.isArray(node.children)) {
+            return node.children.map(extractText).join('');
+          }
+          return '';
+        };
+        const text = extractText(json?.root).trim();
+        return text.length >= 10;
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: 'Content must be at least 10 characters.',
+    }
+  ),
   tags: z
     .array(z.string().min(1, 'Tag cannot be empty.'))
     .min(1, 'At least one tag must be filled in.'),
@@ -142,12 +161,13 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess }) => {
             <FormItem>
               <Label>Content</Label>
               <FormControl>
-                <Textarea
-                  placeholder='Enter your content'
-                  disabled={isCreatingPost}
-                  {...field}
-                  className='min-h-[186px] resize-y'
-                  aria-invalid={!!fieldState.error}
+                <Editor
+                  onChange={field.onChange}
+                  wrapperClassName={`rounded-md border ${
+                    fieldState.error
+                      ? 'border-destructive ring-1 ring-destructive/20'
+                      : 'border-neutral-300'
+                  }`}
                 />
               </FormControl>
               <FormMessage />

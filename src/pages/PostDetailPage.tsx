@@ -17,6 +17,7 @@ import BlogCard from '@/components/blog/BlogCard';
 import useBlogPosts from '@/hooks/useBlogPosts';
 import PostLikeButton from '@/components/blog/PostLikeButton';
 import useGetUserProfileById from '@/hooks/useGetUserProfileById';
+import imageDefaultError from '@/assets/images/defaultImageIfError.png';
 
 const PostDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -50,6 +51,8 @@ const PostDetailPage: React.FC = () => {
     id: post?.author?.id as number,
     enabled: !!post?.author?.id,
   });
+
+  const [imageError, setImageError] = useState(false);
 
   return (
     <>
@@ -119,11 +122,20 @@ const PostDetailPage: React.FC = () => {
             </div>
             <div className='h-[1px] w-full bg-neutral-300' />
             <div className='h-auto w-full rounded-sm'>
-              <img
-                src={post.imageUrl}
-                alt={post.title}
-                className='size-full rounded-sm object-cover'
-              />
+              {!imageError ? (
+                <img
+                  src={post.imageUrl}
+                  alt={post.title}
+                  className='size-full rounded-sm object-cover'
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <img
+                  src={imageDefaultError}
+                  alt='Default Image'
+                  className='size-full rounded-sm object-cover'
+                />
+              )}
             </div>
             <div
               className='prose-sm md:prose-base break-words text-neutral-950'
