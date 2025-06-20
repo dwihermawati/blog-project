@@ -21,7 +21,6 @@ import {
   Strikethrough,
   List,
   ListOrdered,
-  Link as LinkIcon,
   Image as ImageIcon,
   Maximize2,
   Minimize2,
