@@ -73,7 +73,7 @@ const PostDetailPage: React.FC = () => {
         ) : (
           <>
             <h1 className='md:display-lg-bold display-sm-bold text-neutral-900'>
-              {post.title}
+              {capitalizeName(post.title)}
             </h1>
             <div className='flex w-full flex-wrap items-center gap-2'>
               {post.tags.map((tag, idx) => (
@@ -96,7 +96,11 @@ const PostDetailPage: React.FC = () => {
                   className='size-10 group-hover:scale-105 group-hover:brightness-110'
                 />
                 <span className='md:text-sm-medium text-xs-regular group-hover:text-primary-300 text-neutral-900'>
-                  {capitalizeName(post.author.name)}
+                  {userProfile?.name ? (
+                    capitalizeName(userProfile.name)
+                  ) : (
+                    <BeatLoader size={8} color='#0093DD' />
+                  )}
                 </span>
               </Link>
               <div className='size-1 flex-shrink-0 rounded-full bg-neutral-400' />

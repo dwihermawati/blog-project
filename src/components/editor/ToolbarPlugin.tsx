@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
   $getSelection,
@@ -8,6 +8,7 @@ import {
   FORMAT_TEXT_COMMAND,
   FORMAT_ELEMENT_COMMAND,
 } from 'lexical';
+import { $setBlocksType } from '@lexical/selection';
 import { $createHeadingNode } from '@lexical/rich-text';
 import {
   INSERT_UNORDERED_LIST_COMMAND,
@@ -67,12 +68,39 @@ export function ToolbarPlugin() {
     setIsFullscreen((prev) => !prev);
   };
 
+  const [blockType, setBlockType] = useState<string | null>(null);
+  useEffect(() => {
+    return editor.registerUpdateListener(({ editorState }) => {
+      editorState.read(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+          const anchorNode = selection.anchor.getNode();
+          const parent = anchorNode.getParent();
+
+          const node =
+            parent && parent.getType() !== 'root' ? parent : anchorNode;
+
+          if (node.getType() === 'heading') {
+            // @ts-ignore: heading node has getTag
+            const tag = node.getTag();
+            setBlockType(tag);
+          } else {
+            setBlockType(null);
+          }
+        }
+      });
+    });
+  }, [editor]);
+
   const applyHeading = (tag: 'h1' | 'h2' | 'h3') => {
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
-        const heading = $createHeadingNode(tag);
-        selection.insertNodes([heading]);
+        try {
+          $setBlocksType(selection, () => $createHeadingNode(tag));
+        } catch (err) {
+          console.error('Failed to set heading:', err);
+        }
       }
     });
   };
@@ -110,6 +138,7 @@ export function ToolbarPlugin() {
   return (
     <div className='toolbar flex flex-wrap items-center gap-2 border-b border-b-neutral-300 p-2.5'>
       <Select
+        value={blockType ?? undefined}
         onValueChange={(value: 'h1' | 'h2' | 'h3') => applyHeading(value)}
       >
         <SelectTrigger className='w-30'>

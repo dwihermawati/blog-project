@@ -27,8 +27,8 @@ import StatisticDialog from './StatisticDialog';
 import { toast } from 'react-toastify';
 import CommentDialog from './CommentDialog';
 import PostLikeButton from './PostLikeButton';
-import useUserProfileByID from '@/hooks/useGetUserProfileById';
 import imageDefaultError from '@/assets/images/defaultImageIfError.png';
+import useGetUserProfileById from '@/hooks/useGetUserProfileById';
 
 type BlogCardProps = {
   variant?: 'blogpost' | 'most-liked' | 'user-blogpost';
@@ -62,7 +62,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
     setCommentDialogOpen(true);
   };
 
-  const { data: userProfile } = useUserProfileByID({
+  const { data: userProfile } = useGetUserProfileById({
     id: post.author.id,
     enabled: !!post.author.id,
   });
@@ -104,34 +104,40 @@ const BlogCard: React.FC<BlogCardProps> = ({
             variant === 'most-liked' ? 'gap-1' : 'gap-2 md:gap-3'
           )}
         >
-          <Link to={`/posts/${post.id}`}>
+          <Link
+            to={`/posts/${post.id}`}
+            className={cn(
+              'group flex flex-col',
+              variant === 'most-liked' ? 'gap-1' : 'gap-2 md:gap-3'
+            )}
+          >
             <h2
               className={cn(
-                'hover:text-primary-300 cursor-pointer break-words text-neutral-900',
+                'group-hover:text-primary-300 cursor-pointer break-words text-neutral-900',
                 variant === 'most-liked'
                   ? 'text-md-bold'
                   : 'text-md-bold md:text-xl-bold'
               )}
             >
-              {post.title}
+              {capitalizeName(post.title)}
             </h2>
+            {(variant === 'blogpost' || variant === 'user-blogpost') && (
+              <div className='flex w-full flex-wrap items-center gap-2'>
+                {post.tags.map((tag, idx) => (
+                  <div
+                    key={idx}
+                    className='text-xs-regular flex-center h-7 w-fit rounded-md border border-neutral-300 bg-white p-2 text-neutral-900'
+                  >
+                    {tag}
+                  </div>
+                ))}
+              </div>
+            )}
+            <p
+              className='text-xs-regular md:text-sm-regular line-clamp-2 break-words text-neutral-900'
+              dangerouslySetInnerHTML={renderSafeHTML(post.content)}
+            />
           </Link>
-          {(variant === 'blogpost' || variant === 'user-blogpost') && (
-            <div className='flex w-full flex-wrap items-center gap-2'>
-              {post.tags.map((tag, idx) => (
-                <div
-                  key={idx}
-                  className='text-xs-regular flex-center h-7 w-fit rounded-md border border-neutral-300 bg-white p-2 text-neutral-900'
-                >
-                  {tag}
-                </div>
-              ))}
-            </div>
-          )}
-          <p
-            className='text-xs-regular md:text-sm-regular line-clamp-2 break-words text-neutral-900'
-            dangerouslySetInnerHTML={renderSafeHTML(post.content)}
-          />
           {variant === 'user-blogpost' && (
             <>
               <div className='flex items-center gap-3'>
@@ -211,7 +217,11 @@ const BlogCard: React.FC<BlogCardProps> = ({
                 className='aspect-square h-auto group-hover:scale-105 group-hover:brightness-110'
               />
               <span className='md:text-sm-medium text-xs-regular group-hover:text-primary-300 text-neutral-900'>
-                {capitalizeName(post.author.name)}
+                {userProfile?.name ? (
+                  capitalizeName(userProfile.name)
+                ) : (
+                  <BeatLoader size={8} color='#0093DD' />
+                )}
               </span>
             </Link>
             <div className='size-1 flex-shrink-0 rounded-full bg-neutral-400' />

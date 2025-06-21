@@ -20,6 +20,11 @@ const useUpdateProfile = (options?: UseUpdateProfileOptions) => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['user', authUser?.email] });
+      queryClient.invalidateQueries({
+        queryKey: ['userProfile', authUser?.id],
+      });
+      queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['myPosts'] });
       if (authUser) {
         login({ token: token as string }, authUser.email, {
           ...authUser,

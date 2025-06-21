@@ -2,12 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import userService from '@/services/userService';
 import { UserProfileResponse } from '@/types/user';
 
-interface UseUserProfileByIdParams {
+interface UseGetUserProfileByIdParams {
   id: number;
   enabled?: boolean;
 }
 
-const useGetUserProfileById = (params: UseUserProfileByIdParams) => {
+const useGetUserProfileById = (params: UseGetUserProfileByIdParams) => {
   const { id, enabled = true } = params;
 
   return useQuery<UserProfileResponse, Error>({

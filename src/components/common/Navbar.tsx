@@ -22,9 +22,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Icon } from '@iconify/react';
 import { useAuth } from '@/contexts/AuthContext';
-import useUser from '@/hooks/useGetUserByEmail';
 import capitalizeName from '@/lib/capitalizeName';
 import AvatarDisplay from '../shared/AvatarDisplay';
+import useGetUserByEmail from '@/hooks/useGetUserByEmail';
 
 type NavbarProps = {
   variant?: 'default' | 'secondary' | 'primary';
@@ -48,7 +48,7 @@ const Navbar: React.FC<NavbarProps> = ({ variant = 'default' }) => {
   const { isAuthenticated, user: authUser, logout } = useAuth();
   const navigate = useNavigate();
 
-  const { data: userData, isLoading: isUserLoading } = useUser();
+  const { data: userData, isLoading: isUserLoading } = useGetUserByEmail();
 
   const displayUserName = userData?.name || authUser?.email || 'User';
   const displayAvatarUrl = userData?.avatarUrl;

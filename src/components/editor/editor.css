@@ -11,3 +11,15 @@
   outline: none !important;
   padding-inline: 0 !important;
 }
+
+.editor-container h1 {
+  font-size: 2rem;
+}
+
+.editor-container h2 {
+  font-size: 1.5rem;
+}
+
+.editor-container h3 {
+  font-size: 1rem;
+}

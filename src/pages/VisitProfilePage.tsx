@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { XIcon } from 'lucide-react';
-import useUserProfileByID from '@/hooks/useGetUserProfileById';
+import useGetUserProfileById from '@/hooks/useGetUserProfileById';
 import useBlogPosts from '@/hooks/useBlogPosts';
 import { CircleUserRound } from 'lucide-react';
 
@@ -32,7 +32,7 @@ const VisitProfilePage: React.FC = () => {
     isLoading: isProfileLoading,
     isError: isProfileError,
     error: profileError,
-  } = useUserProfileByID({ id: numericId, enabled: isValidId });
+  } = useGetUserProfileById({ id: numericId, enabled: isValidId });
 
   const { data: userPosts, isLoading: isUserPostsLoading } = useBlogPosts({
     userId: userProfile?.id,
@@ -95,7 +95,7 @@ const VisitProfilePage: React.FC = () => {
                       lineHeight: generateClamp(24, 30, 1248),
                     }}
                   >
-                    {userProfile.headline}
+                    {capitalizeName(userProfile.headline)}
                   </p>
                 )}
               </div>

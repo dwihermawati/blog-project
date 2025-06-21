@@ -18,10 +18,26 @@ const useCreatePost = (options?: UseCreatePostOptions) => {
       return blogService.createPost(payload, token);
     },
     onSuccess: (newPost) => {
+      if (authUser?.id) {
+        queryClient.setQueryData(
+          ['myPosts-count', authUser.id.toString()],
+          (old: any) => {
+            if (!old) return old;
+            return {
+              ...old,
+              total: (old.total || 0) + 1,
+              data: [newPost, ...(old.data || [])],
+            };
+          }
+        );
+      }
       queryClient.invalidateQueries({ queryKey: ['blogPosts'] });
       queryClient.invalidateQueries({ queryKey: ['recommendedPosts'] });
       queryClient.invalidateQueries({
         queryKey: ['myPosts', authUser?.id?.toString()],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['myPosts-count', authUser?.id?.toString()],
       });
       options?.onSuccess?.(newPost);
     },

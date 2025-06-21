@@ -4,7 +4,6 @@ import AvatarDisplay, {
   getFullAvatarUrl,
 } from '@/components/shared/AvatarDisplay';
 import { generateClamp } from '@/function/generate-clamp';
-import useUser from '@/hooks/useGetUserByEmail';
 import capitalizeName from '@/lib/capitalizeName';
 import React, { useState } from 'react';
 import { BeatLoader } from 'react-spinners';
@@ -26,6 +25,7 @@ import EditProfileForm from '@/components/profile/EditProfileForm';
 import useBlogPosts from '@/hooks/useBlogPosts';
 import { useAuth } from '@/contexts/AuthContext';
 import { CircleUserRound } from 'lucide-react';
+import useGetUserByEmail from '@/hooks/useGetUserByEmail';
 
 const ProfilePage: React.FC = () => {
   const {
@@ -33,7 +33,7 @@ const ProfilePage: React.FC = () => {
     isLoading: isProfileLoading,
     isError: isProfileError,
     error: profileError,
-  } = useUser();
+  } = useGetUserByEmail();
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
@@ -100,7 +100,7 @@ const ProfilePage: React.FC = () => {
                         lineHeight: generateClamp(24, 30, 1248),
                       }}
                     >
-                      {userProfile.headline}
+                      {capitalizeName(userProfile.headline)}
                     </p>
                   )}
                 </div>

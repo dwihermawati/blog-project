@@ -12,10 +12,10 @@ import CommentCard from './CommentCard';
 import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import useCreateComment from '@/hooks/useCreateComment';
 import useComments from '@/hooks/useComments';
-import useUser from '@/hooks/useGetUserByEmail';
 import { useAuth } from '@/contexts/AuthContext';
 import capitalizeName from '@/lib/capitalizeName';
 import { toast } from 'react-toastify';
+import useGetUserByEmail from '@/hooks/useGetUserByEmail';
 
 const commentSchema = z.object({
   content: z.string().min(3, 'Comments cannot be empty.'),
@@ -29,7 +29,7 @@ type PostCommentsProps = {
 const CommentForm: React.FC<PostCommentsProps> = ({ postId, onOpenDialog }) => {
   const navigate = useNavigate();
   const { isAuthenticated, user: authUser, token } = useAuth();
-  const { data: userData, isLoading: isUserLoading } = useUser();
+  const { data: userData, isLoading: isUserLoading } = useGetUserByEmail();
 
   const currentUserAvatarUrl = userData?.avatarUrl;
   const currentUserDisplayName = userData?.name || authUser?.email || 'User';

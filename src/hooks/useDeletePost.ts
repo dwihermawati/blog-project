@@ -16,11 +16,12 @@ interface DeletePostContext {
   previousBlogLists?: Array<[QueryKey, BlogListResponse | undefined]>;
   previousMyPostsLists?: Array<[QueryKey, BlogListResponse | undefined]>;
   previousPostDetail?: BlogPost | undefined;
+  previousMyPostsCount?: BlogListResponse | undefined;
 }
 
 const useDeletePost = (options?: UseDeletePostOptions) => {
   const queryClient = useQueryClient();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const rollbackQueryList = (
     list: Array<[QueryKey, BlogListResponse | undefined]> | undefined
   ) => {
@@ -40,6 +41,26 @@ const useDeletePost = (options?: UseDeletePostOptions) => {
       return blogService.deletePost(postId, token);
     },
     onMutate: async (postIdToDelete) => {
+      const previousMyPostsCount = queryClient.getQueryData<BlogListResponse>([
+        'myPosts-count',
+        user?.id?.toString(),
+      ]);
+
+      queryClient.setQueryData(
+        ['myPosts-count', user?.id?.toString()],
+        (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            total: Math.max((old.total || 1) - 1, 0),
+            data:
+              old.data?.filter(
+                (post: BlogPost) => post.id !== postIdToDelete
+              ) || [],
+          };
+        }
+      );
+
       await queryClient.cancelQueries({ queryKey: ['blogPosts'] });
       await queryClient.cancelQueries({ queryKey: ['myPosts'] });
       await queryClient.cancelQueries({
@@ -94,7 +115,12 @@ const useDeletePost = (options?: UseDeletePostOptions) => {
         undefined
       );
 
-      return { previousBlogLists, previousPostDetail, previousMyPostsLists };
+      return {
+        previousBlogLists,
+        previousPostDetail,
+        previousMyPostsLists,
+        previousMyPostsCount,
+      };
     },
 
     onError: (err, postIdToDelete, context) => {
@@ -103,6 +129,10 @@ const useDeletePost = (options?: UseDeletePostOptions) => {
       queryClient.setQueryData(
         ['postDetail', postIdToDelete],
         context?.previousPostDetail
+      );
+      queryClient.setQueryData(
+        ['myPosts-count', user?.id?.toString()],
+        context?.previousMyPostsCount
       );
       options?.onError?.(err);
     },
@@ -116,6 +146,9 @@ const useDeletePost = (options?: UseDeletePostOptions) => {
       queryClient.invalidateQueries({ queryKey: ['myPosts'] });
       queryClient.invalidateQueries({
         queryKey: ['postDetail', postIdToDelete],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['myPosts-count', user?.id?.toString()],
       });
     },
   });

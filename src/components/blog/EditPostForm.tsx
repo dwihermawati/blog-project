@@ -11,7 +11,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { BeatLoader } from 'react-spinners';
 import useUpdatePost from '@/hooks/useUpdatePost';
 import { BlogPost, UpdatePostPayload } from '@/types/blog';
@@ -20,6 +19,7 @@ import { ImageUploadController } from '../shared/ImageUploadController';
 import { TagInputField } from '../shared/TagInputField';
 import { useAnimation, motion } from 'motion/react';
 import { toast } from 'react-toastify';
+import Editor from '../editor/Editor';
 
 const editPostSchema = z.object({
   title: z
@@ -27,10 +27,28 @@ const editPostSchema = z.object({
     .min(1, 'Title is required.')
     .max(100, 'Maximum title 100 characters.')
     .optional(),
-  content: z
-    .string()
-    .min(10, 'Content is required and must be at least 10 characters.')
-    .optional(),
+  content: z.string().refine(
+    (val) => {
+      try {
+        const json = JSON.parse(val);
+        const extractText = (node: any): string => {
+          if (!node) return '';
+          if (node.text) return node.text;
+          if (Array.isArray(node.children)) {
+            return node.children.map(extractText).join('');
+          }
+          return '';
+        };
+        const text = extractText(json?.root).trim();
+        return text.length >= 10;
+      } catch {
+        return false;
+      }
+    },
+    {
+      message: 'Content must be at least 10 characters.',
+    }
+  ),
   tags: z
     .array(z.string().min(1, 'Tag cannot be empty.'))
     .min(1, 'At least one tag must be filled in.')
@@ -162,13 +180,14 @@ const EditPostForm: React.FC<EditPostFormProps> = ({
             <FormItem>
               <Label>Content</Label>
               <FormControl>
-                <Textarea
-                  placeholder='Enter your content'
-                  disabled={isUpdatingPost}
-                  {...field}
-                  className='min-h-[186px] resize-y'
-                  aria-invalid={!!fieldState.error}
-                  value={field.value || ''}
+                <Editor
+                  onChange={field.onChange}
+                  initialContent={field.value}
+                  wrapperClassName={`rounded-md border ${
+                    fieldState.error
+                      ? 'border-destructive ring-1 ring-destructive/20'
+                      : 'border-neutral-300'
+                  }`}
                 />
               </FormControl>
               <FormMessage />
