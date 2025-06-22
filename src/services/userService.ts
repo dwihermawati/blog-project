@@ -9,18 +9,10 @@ import {
 } from '@/types/user';
 
 const userService = {
-  getUserByEmail: async (
-    email: string,
-    token?: string
-  ): Promise<UserProfileResponse> => {
+  getUserByEmail: async (email: string): Promise<UserProfileResponse> => {
     try {
       const response = await apiClient.get<UserProfileResponse>(
-        `/users/by-email/${email}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `/users/by-email/${email}`
       );
       return response.data;
     } catch (error: any) {
@@ -56,8 +48,7 @@ const userService = {
   },
 
   changePassword: async (
-    payload: ChangePasswordPayload,
-    token: string
+    payload: ChangePasswordPayload
   ): Promise<ChangePasswordSuccessResponse> => {
     try {
       const apiPayload = {
@@ -68,12 +59,7 @@ const userService = {
 
       const response = await apiClient.patch<ChangePasswordSuccessResponse>(
         '/users/password',
-        apiPayload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        apiPayload
       );
       return response.data;
     } catch (error: any) {
@@ -87,8 +73,7 @@ const userService = {
   },
 
   updateProfile: async (
-    payload: UpdateProfilePayload,
-    token: string
+    payload: UpdateProfilePayload
   ): Promise<UserProfileResponse> => {
     try {
       const formData = new FormData();
@@ -107,7 +92,6 @@ const userService = {
         formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',
           },
         }

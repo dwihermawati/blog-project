@@ -19,7 +19,6 @@ interface GetPostsParams {
   search?: string;
   userId?: number;
   sortBy?: 'recommended' | 'most-liked' | 'search' | 'myPosts' | 'userId';
-  token?: string;
 }
 
 const blogService = {
@@ -36,13 +35,6 @@ const blogService = {
 
     if (params?.sortBy === 'myPosts' && params?.userId) {
       path = '/posts/my-posts';
-      if (params.token) {
-        config.headers = {
-          Authorization: `Bearer ${params.token}`,
-        };
-      } else {
-        throw new Error('Token is required for myPosts');
-      }
     } else if (params?.sortBy === 'recommended') {
       path = '/posts/recommended';
     } else if (params?.sortBy === 'most-liked') {
@@ -87,18 +79,10 @@ const blogService = {
     }
   },
 
-  deletePost: async (
-    postId: number,
-    token: string
-  ): Promise<DeletePostSuccessResponse> => {
+  deletePost: async (postId: number): Promise<DeletePostSuccessResponse> => {
     try {
       const response = await apiClient.delete<DeletePostSuccessResponse>(
-        `/posts/${postId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `/posts/${postId}`
       );
       return response.data;
     } catch (error: any) {
@@ -131,16 +115,11 @@ const blogService = {
       }
     }
   },
-  likePost: async (postId: number, token: string): Promise<BlogPost> => {
+  likePost: async (postId: number): Promise<BlogPost> => {
     try {
       const response = await apiClient.post<BlogPost>(
         `/posts/${postId}/like`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        {}
       );
       return response.data;
     } catch (error: any) {
@@ -176,18 +155,12 @@ const blogService = {
   },
   createComment: async (
     postId: number,
-    payload: CreateCommentPayload,
-    token: string
+    payload: CreateCommentPayload
   ): Promise<CreateCommentSuccessResponse> => {
     try {
       const response = await apiClient.post<CreateCommentSuccessResponse>(
         `/comments/${postId}`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        payload
       );
       return response.data;
     } catch (error: any) {
@@ -200,10 +173,7 @@ const blogService = {
     }
   },
 
-  createPost: async (
-    payload: CreatePostPayload,
-    token: string
-  ): Promise<BlogPost> => {
+  createPost: async (payload: CreatePostPayload): Promise<BlogPost> => {
     try {
       const formData = new FormData();
       formData.append('title', payload.title);
@@ -213,7 +183,6 @@ const blogService = {
 
       const response = await apiClient.post<BlogPost>('/posts', formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
@@ -229,8 +198,7 @@ const blogService = {
   },
   updatePost: async (
     postId: number,
-    payload: UpdatePostPayload,
-    token: string
+    payload: UpdatePostPayload
   ): Promise<BlogPost> => {
     try {
       const formData = new FormData();
@@ -255,7 +223,6 @@ const blogService = {
         formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data',
           },
         }

@@ -7,12 +7,14 @@ import {
   $isRangeSelection,
   FORMAT_TEXT_COMMAND,
   FORMAT_ELEMENT_COMMAND,
+  $createParagraphNode,
 } from 'lexical';
 import { $setBlocksType } from '@lexical/selection';
 import { $createHeadingNode } from '@lexical/rich-text';
 import {
   INSERT_UNORDERED_LIST_COMMAND,
   INSERT_ORDERED_LIST_COMMAND,
+  $isListNode,
 } from '@lexical/list';
 import { TOGGLE_LINK_COMMAND } from '@lexical/link';
 import {
@@ -40,10 +42,12 @@ const ToolbarButton = ({
   onClick,
   title,
   children,
+  active = false,
 }: {
   onClick: () => void;
   title: string;
   children: React.ReactNode;
+  active?: boolean;
 }) => (
   <Button
     type='button'
@@ -51,7 +55,7 @@ const ToolbarButton = ({
     size='icon'
     title={title}
     onClick={onClick}
-    className='size-7'
+    className={`size-7 ${active ? 'bg-neutral-100' : ''}`}
   >
     {children}
   </Button>
@@ -60,6 +64,13 @@ const ToolbarButton = ({
 export function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isBold, setIsBold] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
+  const [isStrikethrough, setIsStrikethrough] = useState(false);
+  const [isBulletList, setIsBulletList] = useState(false);
+  const [isNumberedList, setIsNumberedList] = useState(false);
+  const [isLink, setIsLink] = useState(false);
+  const [alignment, setAlignment] = useState('');
 
   const toggleFullscreen = () => {
     const container = document.querySelector('.editor-container');
@@ -68,24 +79,56 @@ export function ToolbarPlugin() {
     setIsFullscreen((prev) => !prev);
   };
 
-  const [blockType, setBlockType] = useState<string | null>(null);
+  const [blockType, setBlockType] = useState<'paragraph' | 'h1' | 'h2' | 'h3'>(
+    'paragraph'
+  );
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
+          setIsBold(selection.hasFormat('bold'));
+          setIsItalic(selection.hasFormat('italic'));
+          setIsStrikethrough(selection.hasFormat('strikethrough'));
           const anchorNode = selection.anchor.getNode();
           const parent = anchorNode.getParent();
 
           const node =
             parent && parent.getType() !== 'root' ? parent : anchorNode;
+          const type = node.getType();
 
-          if (node.getType() === 'heading') {
+          if (type === 'heading') {
             // @ts-ignore: heading node has getTag
-            const tag = node.getTag();
-            setBlockType(tag);
+            setBlockType(node.getTag());
           } else {
-            setBlockType(null);
+            setBlockType('paragraph');
+          }
+
+          if ($isListNode(node)) {
+            setIsBulletList(node.getListType() === 'bullet');
+            setIsNumberedList(node.getListType() === 'number');
+          } else {
+            setIsBulletList(false);
+            setIsNumberedList(false);
+          }
+
+          const maybeLinkNode =
+            parent?.getType() === 'link'
+              ? parent
+              : node.getType() === 'link'
+                ? node
+                : null;
+          setIsLink(!!maybeLinkNode);
+
+          const dom = editor.getElementByKey(node.getKey());
+          if (dom) {
+            const computed = window.getComputedStyle(dom);
+            const textAlign = computed.textAlign;
+            if (['left', 'center', 'right', 'justify'].includes(textAlign)) {
+              setAlignment(textAlign);
+            } else {
+              setAlignment('');
+            }
           }
         }
       });
@@ -93,6 +136,7 @@ export function ToolbarPlugin() {
   }, [editor]);
 
   const applyHeading = (tag: 'h1' | 'h2' | 'h3') => {
+    if (!tag) return;
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
@@ -120,6 +164,9 @@ export function ToolbarPlugin() {
       editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url });
     }
   };
+  const removeLink = () => {
+    editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+  };
 
   const insertImage = () => {
     const url = prompt('Enter image URL');
@@ -139,7 +186,19 @@ export function ToolbarPlugin() {
     <div className='toolbar flex flex-wrap items-center gap-2 border-b border-b-neutral-300 p-2.5'>
       <Select
         value={blockType ?? undefined}
-        onValueChange={(value: 'h1' | 'h2' | 'h3') => applyHeading(value)}
+        onValueChange={(value: 'paragraph' | 'h1' | 'h2' | 'h3') => {
+          setBlockType(value);
+          if (value !== 'paragraph') {
+            applyHeading(value);
+          } else {
+            editor.update(() => {
+              const selection = $getSelection();
+              if ($isRangeSelection(selection)) {
+                $setBlocksType(selection, () => $createParagraphNode());
+              }
+            });
+          }
+        }}
       >
         <SelectTrigger className='w-30'>
           <SelectValue placeholder='Heading' />
@@ -156,6 +215,7 @@ export function ToolbarPlugin() {
         <ToolbarButton
           onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')}
           title='Bold'
+          active={isBold}
         >
           <Bold size={18} />
         </ToolbarButton>
@@ -164,12 +224,14 @@ export function ToolbarPlugin() {
             editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
           }
           title='Strikethrough'
+          active={isStrikethrough}
         >
           <Strikethrough size={18} />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')}
           title='Italic'
+          active={isItalic}
         >
           <Italic size={18} />
         </ToolbarButton>
@@ -184,12 +246,17 @@ export function ToolbarPlugin() {
 
       {/* Lists */}
       <div className='flex gap-1'>
-        <ToolbarButton onClick={() => insertList('bullet')} title='Bullet List'>
+        <ToolbarButton
+          onClick={() => insertList('bullet')}
+          title='Bullet List'
+          active={isBulletList}
+        >
           <List size={18} />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => insertList('number')}
           title='Numbered List'
+          active={isNumberedList}
         >
           <ListOrdered size={18} />
         </ToolbarButton>
@@ -201,6 +268,7 @@ export function ToolbarPlugin() {
         <ToolbarButton
           onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left')}
           title='Align Left'
+          active={alignment === 'left'}
         >
           <Icon icon='ri:align-left' className='size-[18px]' />
         </ToolbarButton>
@@ -209,6 +277,7 @@ export function ToolbarPlugin() {
             editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center')
           }
           title='Align Center'
+          active={alignment === 'center'}
         >
           <Icon icon='ri:align-center' className='size-[18px]' />
         </ToolbarButton>
@@ -217,6 +286,7 @@ export function ToolbarPlugin() {
             editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right')
           }
           title='Align Right'
+          active={alignment === 'right'}
         >
           <Icon icon='ri:align-right' className='size-[18px]' />
         </ToolbarButton>
@@ -225,6 +295,7 @@ export function ToolbarPlugin() {
             editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify')
           }
           title='Justify'
+          active={alignment === 'justify'}
         >
           <Icon icon='ri:align-justify' className='size-[18px]' />
         </ToolbarButton>
@@ -234,13 +305,10 @@ export function ToolbarPlugin() {
       {/* Others */}
       <div className='flex gap-1'>
         <ToolbarButton onClick={insertLink} title='Insert Link'>
-          <Icon icon='ph:link-simple' className='size-[18px]' />
+          <Icon icon='ri:link' className='size-[18px]' />
         </ToolbarButton>
-        <ToolbarButton onClick={insertLink} title='Insert Link'>
-          <Icon
-            icon='mingcute:unlink-2-line'
-            className='size-[18px] rotate-180 transform'
-          />
+        <ToolbarButton onClick={removeLink} title='Remove Link' active={isLink}>
+          <Icon icon='tabler:unlink' className='size-[18px]' />
         </ToolbarButton>
         <ToolbarButton onClick={insertImage} title='Insert Image'>
           <ImageIcon size={18} />

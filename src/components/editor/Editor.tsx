@@ -7,6 +7,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
+import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { useState } from 'react';
 import { $getRoot, $createParagraphNode, $createTextNode } from 'lexical';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
@@ -66,7 +67,9 @@ export default function Editor({
         <RichTextPlugin
           contentEditable={
             <div className='relative'>
-              <ContentEditable className='outline-primary-300 min-h-[186px] px-4 py-3' />
+              <ContentEditable
+                className={`editor-input ${wrapperClassName} outline-primary-300 min-h-[186px] px-4 py-3`}
+              />
               {isEmpty && (
                 <p className='text-sm-regular pointer-events-none absolute top-3 left-4 text-neutral-500'>
                   Enter your content
@@ -80,6 +83,7 @@ export default function Editor({
         <InitialContentPlugin initialContent={initialContent} />
         <HistoryPlugin />
         <LinkPlugin />
+        <ListPlugin />
         <OnChangePlugin
           onChange={(editorState) => {
             const json = editorState.toJSON();
