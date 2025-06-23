@@ -22,13 +22,12 @@ const useBlogPosts = (params: UseBlogPostsParams = {}) => {
     sortBy,
     enabled = true,
     queryKeyPrefix = ['blogPosts'],
-    token,
   } = params;
 
   return useQuery<BlogListResponse, Error>({
     queryKey: [...queryKeyPrefix, sortBy, page, limit, search, userId],
     queryFn: async () =>
-      blogService.getPosts({ page, limit, search, userId, sortBy, token }),
+      blogService.getPosts({ page, limit, search, userId, sortBy }),
     placeholderData: (previousData) => previousData,
     staleTime: 1000 * 60,
     gcTime: 1000 * 60 * 30,

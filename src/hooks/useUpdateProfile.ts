@@ -16,7 +16,7 @@ const useUpdateProfile = (options?: UseUpdateProfileOptions) => {
     mutationFn: async (payload) => {
       if (!token)
         throw new Error('You must be logged in to update your profile.');
-      return userService.updateProfile(payload, token);
+      return userService.updateProfile(payload);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['user', authUser?.email] });

@@ -9,40 +9,12 @@ import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { useState } from 'react';
-import { $getRoot, $createParagraphNode, $createTextNode } from 'lexical';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useEffect } from 'react';
+import { $getRoot } from 'lexical';
 
 import { editorConfig } from './editorConfig';
-import { ToolbarPlugin } from './ToolbarPlugin';
-import './editor.css';
-
-function InitialContentPlugin({ initialContent }: { initialContent?: string }) {
-  const [editor] = useLexicalComposerContext();
-  const [initialized, setInitialized] = useState(false);
-
-  useEffect(() => {
-    if (!initialContent || initialized) return;
-
-    try {
-      const parsedState = editor.parseEditorState(initialContent);
-      editor.setEditorState(parsedState);
-    } catch (err) {
-      editor.update(() => {
-        const root = $getRoot();
-        root.clear();
-        const paragraph = $createParagraphNode();
-        const textNode = $createTextNode(initialContent);
-        paragraph.append(textNode);
-        root.append(paragraph);
-      });
-    }
-
-    setInitialized(true);
-  }, [editor, initialContent, initialized]);
-
-  return null;
-}
+import { ToolbarPlugin } from './plugins/ToolbarPlugin';
+import InitialContentPlugin from './plugins/InitialContentPlugin';
+import '@/editor.css';
 
 export default function Editor({
   onChange,
@@ -68,7 +40,7 @@ export default function Editor({
           contentEditable={
             <div className='relative'>
               <ContentEditable
-                className={`editor-input ${wrapperClassName} outline-primary-300 min-h-[186px] px-4 py-3`}
+                className={`editor-input outline-primary-300 min-h-[186px] px-4 py-3`}
               />
               {isEmpty && (
                 <p className='text-sm-regular pointer-events-none absolute top-3 left-4 text-neutral-500'>

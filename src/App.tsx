@@ -3,6 +3,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import './index.css';
+import './editor.css';
 import { AuthProvider } from './contexts/AuthContext';
 import SearchResultsPage from './pages/SearchResultsPage';
 import PostDetailPage from './pages/PostDetailPage';

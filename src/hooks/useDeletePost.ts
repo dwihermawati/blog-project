@@ -38,7 +38,7 @@ const useDeletePost = (options?: UseDeletePostOptions) => {
   >({
     mutationFn: async (postId: number) => {
       if (!token) throw new Error('You must be logged in to delete a post.');
-      return blogService.deletePost(postId, token);
+      return blogService.deletePost(postId);
     },
     onMutate: async (postIdToDelete) => {
       const previousMyPostsCount = queryClient.getQueryData<BlogListResponse>([

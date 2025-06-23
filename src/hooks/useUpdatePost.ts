@@ -25,7 +25,7 @@ const useUpdatePost = (options?: UseUpdatePostOptions) => {
   >({
     mutationFn: async ({ postId, payload }) => {
       if (!token) throw new Error('You must be logged in to update posts.');
-      return blogService.updatePost(postId, payload, token);
+      return blogService.updatePost(postId, payload);
     },
     onMutate: async ({ postId, payload }) => {
       await queryClient.cancelQueries({ queryKey: ['postDetail', postId] });

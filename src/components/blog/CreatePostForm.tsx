@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label';
 import { ImageUploadController } from '../shared/ImageUploadController';
 import { useAnimation, motion } from 'motion/react';
 import { toast } from 'react-toastify';
-import Editor from '../editor/Editor';
+import Editor from '../editor/LazyEditor';
 
 const createPostSchema = z.object({
   title: z

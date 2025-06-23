@@ -8,9 +8,11 @@ import {
   FORMAT_TEXT_COMMAND,
   FORMAT_ELEMENT_COMMAND,
   $createParagraphNode,
+  TextNode,
+  ElementNode,
 } from 'lexical';
 import { $setBlocksType } from '@lexical/selection';
-import { $createHeadingNode } from '@lexical/rich-text';
+import { $createHeadingNode, QuoteNode } from '@lexical/rich-text';
 import {
   INSERT_UNORDERED_LIST_COMMAND,
   INSERT_ORDERED_LIST_COMMAND,
@@ -37,6 +39,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import LinkPopover from '@/components/ui/link-popover';
+import { toast } from 'react-toastify';
 
 const ToolbarButton = ({
   onClick,
@@ -71,6 +75,12 @@ export function ToolbarPlugin() {
   const [isNumberedList, setIsNumberedList] = useState(false);
   const [isLink, setIsLink] = useState(false);
   const [alignment, setAlignment] = useState('');
+  const [showLinkPopover, setShowLinkPopover] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+  const [linkPosition, setLinkPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   const toggleFullscreen = () => {
     const container = document.querySelector('.editor-container');
@@ -79,9 +89,27 @@ export function ToolbarPlugin() {
     setIsFullscreen((prev) => !prev);
   };
 
-  const [blockType, setBlockType] = useState<'paragraph' | 'h1' | 'h2' | 'h3'>(
-    'paragraph'
-  );
+  const [blockType, setBlockType] = useState<
+    'paragraph' | 'h1' | 'h2' | 'h3' | 'quote'
+  >('paragraph');
+  const applyBlockType = (type: 'paragraph' | 'h1' | 'h2' | 'h3' | 'quote') => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        switch (type) {
+          case 'quote':
+            $setBlocksType(selection, () => new QuoteNode());
+            break;
+          case 'paragraph':
+            $setBlocksType(selection, () => $createParagraphNode());
+            break;
+          default:
+            $setBlocksType(selection, () => $createHeadingNode(type));
+        }
+      }
+    });
+  };
+
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
@@ -90,37 +118,46 @@ export function ToolbarPlugin() {
           setIsBold(selection.hasFormat('bold'));
           setIsItalic(selection.hasFormat('italic'));
           setIsStrikethrough(selection.hasFormat('strikethrough'));
+
           const anchorNode = selection.anchor.getNode();
-          const parent = anchorNode.getParent();
+          const topNode = anchorNode.getTopLevelElementOrThrow();
+          const type = topNode.getType();
 
-          const node =
-            parent && parent.getType() !== 'root' ? parent : anchorNode;
-          const type = node.getType();
-
+          // Heading, Quote, Paragraph
           if (type === 'heading') {
-            // @ts-ignore: heading node has getTag
-            setBlockType(node.getTag());
+            // @ts-ignore
+            setBlockType(topNode.getTag());
+          } else if (type === 'quote') {
+            setBlockType('quote');
           } else {
             setBlockType('paragraph');
           }
 
-          if ($isListNode(node)) {
-            setIsBulletList(node.getListType() === 'bullet');
-            setIsNumberedList(node.getListType() === 'number');
+          // List Detection
+          if ($isListNode(topNode)) {
+            setIsBulletList(topNode.getListType() === 'bullet');
+            setIsNumberedList(topNode.getListType() === 'number');
           } else {
             setIsBulletList(false);
             setIsNumberedList(false);
           }
 
-          const maybeLinkNode =
-            parent?.getType() === 'link'
-              ? parent
-              : node.getType() === 'link'
-                ? node
-                : null;
-          setIsLink(!!maybeLinkNode);
+          // Link Detection
+          let node: TextNode | ElementNode | null = anchorNode;
+          let foundLink = false;
 
-          const dom = editor.getElementByKey(node.getKey());
+          while (node != null) {
+            if (node.getType() === 'link') {
+              foundLink = true;
+              break;
+            }
+            node = node.getParent();
+          }
+
+          setIsLink(foundLink);
+
+          // Alignment Detection
+          const dom = editor.getElementByKey(topNode.getKey());
           if (dom) {
             const computed = window.getComputedStyle(dom);
             const textAlign = computed.textAlign;
@@ -135,20 +172,6 @@ export function ToolbarPlugin() {
     });
   }, [editor]);
 
-  const applyHeading = (tag: 'h1' | 'h2' | 'h3') => {
-    if (!tag) return;
-    editor.update(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        try {
-          $setBlocksType(selection, () => $createHeadingNode(tag));
-        } catch (err) {
-          console.error('Failed to set heading:', err);
-        }
-      }
-    });
-  };
-
   const insertList = (type: 'bullet' | 'number') => {
     editor.dispatchCommand(
       type === 'bullet'
@@ -158,11 +181,31 @@ export function ToolbarPlugin() {
     );
   };
 
-  const insertLink = () => {
-    const url = prompt('Enter URL');
-    if (url) {
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url });
+  const openLinkPopover = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const selectedText = selection.toString().trim();
+
+    if (!selectedText || range.collapsed) {
+      toast.info('You must select the text first');
+      return;
     }
+
+    const rect = range.getBoundingClientRect();
+    setLinkPosition({
+      top: rect.bottom + window.scrollY + 8,
+      left: rect.left + window.scrollX,
+    });
+
+    setShowLinkPopover(true);
+  };
+
+  const insertLink = () => {
+    editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url: linkUrl });
+    setShowLinkPopover(false);
+    setLinkUrl('');
   };
   const removeLink = () => {
     editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
@@ -186,10 +229,10 @@ export function ToolbarPlugin() {
     <div className='toolbar flex flex-wrap items-center gap-2 border-b border-b-neutral-300 p-2.5'>
       <Select
         value={blockType ?? undefined}
-        onValueChange={(value: 'paragraph' | 'h1' | 'h2' | 'h3') => {
+        onValueChange={(value: 'paragraph' | 'h1' | 'h2' | 'h3' | 'quote') => {
           setBlockType(value);
           if (value !== 'paragraph') {
-            applyHeading(value);
+            applyBlockType(value as any);
           } else {
             editor.update(() => {
               const selection = $getSelection();
@@ -207,6 +250,8 @@ export function ToolbarPlugin() {
           <SelectItem value='h1'>Heading 1</SelectItem>
           <SelectItem value='h2'>Heading 2</SelectItem>
           <SelectItem value='h3'>Heading 3</SelectItem>
+          <SelectItem value='paragraph'>Normal</SelectItem>
+          <SelectItem value='quote'>Quote</SelectItem>
         </SelectContent>
       </Select>
       <div className='h-4 w-[1px] bg-[#919EAB]/20'></div>
@@ -304,10 +349,14 @@ export function ToolbarPlugin() {
 
       {/* Others */}
       <div className='flex gap-1'>
-        <ToolbarButton onClick={insertLink} title='Insert Link'>
+        <ToolbarButton
+          onClick={openLinkPopover}
+          title='Insert Link'
+          active={isLink}
+        >
           <Icon icon='ri:link' className='size-[18px]' />
         </ToolbarButton>
-        <ToolbarButton onClick={removeLink} title='Remove Link' active={isLink}>
+        <ToolbarButton onClick={removeLink} title='Remove Link'>
           <Icon icon='tabler:unlink' className='size-[18px]' />
         </ToolbarButton>
         <ToolbarButton onClick={insertImage} title='Insert Image'>
@@ -319,6 +368,16 @@ export function ToolbarPlugin() {
       <ToolbarButton onClick={toggleFullscreen} title='Toggle Fullscreen'>
         {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
       </ToolbarButton>
+
+      {showLinkPopover && (
+        <LinkPopover
+          position={linkPosition}
+          url={linkUrl}
+          onChangeUrl={setLinkUrl}
+          onInsert={insertLink}
+          onClose={() => setShowLinkPopover(false)}
+        />
+      )}
     </div>
   );
 }

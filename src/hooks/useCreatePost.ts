@@ -15,7 +15,7 @@ const useCreatePost = (options?: UseCreatePostOptions) => {
   return useMutation<BlogPost, Error, CreatePostPayload>({
     mutationFn: async (payload) => {
       if (!token) throw new Error('You must be logged in to create a post.');
-      return blogService.createPost(payload, token);
+      return blogService.createPost(payload);
     },
     onSuccess: (newPost) => {
       if (authUser?.id) {

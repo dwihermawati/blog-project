@@ -33,7 +33,7 @@ const useCreateComment = (options?: UseCreateCommentOptions) => {
       if (!token) throw new Error('You must be logged in to leave a comment.');
 
       const payload: CreateCommentPayload = { content };
-      return blogService.createComment(postId, payload, token);
+      return blogService.createComment(postId, payload);
     },
     onMutate: async ({ postId, content }) => {
       await queryClient.cancelQueries({ queryKey: ['comments', postId] });

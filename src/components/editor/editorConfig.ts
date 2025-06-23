@@ -32,6 +32,7 @@ export const editorConfig: InitialConfigType = {
       ul: 'editor-list-ul',
     },
     link: 'editor-link',
+    quote: 'editor-quote',
   },
   onError(error) {
     throw error;
@@ -41,7 +42,23 @@ export const editorConfig: InitialConfigType = {
 
 export const editorCoreConfig: CreateEditorArgs = {
   namespace: 'MyEditor',
-  theme: {},
+  theme: {
+    text: {
+      bold: 'bold',
+      italic: 'italic',
+      strikethrough: 'strikethrough',
+    },
+    list: {
+      listitem: 'editor-listitem',
+      nested: {
+        listitem: 'editor-nested-listitem',
+      },
+      ol: 'editor-list-ol',
+      ul: 'editor-list-ul',
+    },
+    link: 'editor-link',
+    quote: 'editor-quote',
+  },
   onError(error) {
     throw error;
   },

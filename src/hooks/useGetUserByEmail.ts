@@ -12,7 +12,7 @@ const useGetUserByEmail = () => {
       if (!authUser?.email || !token) {
         throw new Error('User email or token is missing for fetching profile.');
       }
-      return userService.getUserByEmail(authUser.email, token);
+      return userService.getUserByEmail(authUser.email);
     },
     enabled: !!authUser?.email && !!token,
     staleTime: 1000 * 60 * 10,

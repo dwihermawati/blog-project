@@ -39,7 +39,7 @@ const useLikePost = (options?: UseLikePostOptions) => {
   return useMutation<BlogPost, Error, number, LikePostContext>({
     mutationFn: async (postId) => {
       if (!token) throw new Error('You must be logged in to like a post.');
-      return blogService.likePost(postId, token);
+      return blogService.likePost(postId);
     },
 
     onMutate: async (postId) => {

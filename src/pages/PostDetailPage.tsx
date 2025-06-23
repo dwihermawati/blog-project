@@ -142,7 +142,7 @@ const PostDetailPage: React.FC = () => {
               )}
             </div>
             <div
-              className='prose-sm md:prose-base break-words text-neutral-950'
+              className='editor-input'
               dangerouslySetInnerHTML={renderSafeHTML(post.content)}
             />
             <div className='h-[1px] w-full bg-neutral-300' />

@@ -19,7 +19,7 @@ import { ImageUploadController } from '../shared/ImageUploadController';
 import { TagInputField } from '../shared/TagInputField';
 import { useAnimation, motion } from 'motion/react';
 import { toast } from 'react-toastify';
-import Editor from '../editor/Editor';
+import Editor from '../editor/LazyEditor';
 
 const editPostSchema = z.object({
   title: z

@@ -46,10 +46,7 @@ const LoginForm: React.FC = () => {
   const { mutate: loginUser, isPending: isLoadingLogin } = useLogin({
     onSuccess: async (data, variables) => {
       try {
-        const userProfile = await userService.getUserByEmail(
-          variables.email,
-          data.token
-        );
+        const userProfile = await userService.getUserByEmail(variables.email);
         auth.login(data, variables.email, userProfile);
       } catch (profileError: any) {
         console.error(

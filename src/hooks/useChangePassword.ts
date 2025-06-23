@@ -23,7 +23,7 @@ const useChangePassword = (options?: UseChangePasswordOptions) => {
     mutationFn: async (payload) => {
       if (!token)
         throw new Error('You must be logged in to change your password.');
-      return userService.changePassword(payload, token);
+      return userService.changePassword(payload);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['user'] });
