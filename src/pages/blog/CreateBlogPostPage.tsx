@@ -16,7 +16,7 @@ const CreateBlogPostPage: React.FC = () => {
     <>
       <Navbar variant='secondary' />
       <main
-        className='custom-container max-w-[734px]'
+        className='custom-container max-w-[784px]'
         style={{
           marginBlockStart: generateClamp(80, 128, 1248),
           marginBlockEnd: generateClamp(40, 48, 1248),

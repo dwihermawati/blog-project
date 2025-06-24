@@ -15,6 +15,7 @@ import { editorConfig } from './editorConfig';
 import { ToolbarPlugin } from './plugins/ToolbarPlugin';
 import InitialContentPlugin from './plugins/InitialContentPlugin';
 import '@/editor.css';
+import FloatingTextFormatToolbarPlugin from './FloatingTextFormatToolbarPlugin';
 
 export default function Editor({
   onChange,
@@ -43,7 +44,7 @@ export default function Editor({
                 className={`editor-input outline-primary-300 min-h-[186px] px-4 py-3`}
               />
               {isEmpty && (
-                <p className='text-sm-regular pointer-events-none absolute top-3 left-4 text-neutral-500'>
+                <p className='placeholder text-sm-regular pointer-events-none absolute top-3 left-4 text-neutral-500'>
                   Enter your content
                 </p>
               )}
@@ -52,6 +53,7 @@ export default function Editor({
           placeholder={null}
           ErrorBoundary={LexicalErrorBoundary}
         />
+        <FloatingTextFormatToolbarPlugin />
         <InitialContentPlugin initialContent={initialContent} />
         <HistoryPlugin />
         <LinkPlugin />

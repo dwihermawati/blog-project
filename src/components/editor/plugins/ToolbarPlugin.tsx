@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
   $getSelection,
@@ -10,6 +10,7 @@ import {
   $createParagraphNode,
   TextNode,
   ElementNode,
+  UNDO_COMMAND,
 } from 'lexical';
 import { $setBlocksType } from '@lexical/selection';
 import { $createHeadingNode, QuoteNode } from '@lexical/rich-text';
@@ -26,12 +27,8 @@ import {
   Strikethrough,
   List,
   ListOrdered,
-  Image as ImageIcon,
-  Maximize2,
-  Minimize2,
 } from 'lucide-react';
 import { Icon } from '@iconify/react';
-import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -41,29 +38,11 @@ import {
 } from '@/components/ui/select';
 import LinkPopover from '@/components/ui/link-popover';
 import { toast } from 'react-toastify';
-
-const ToolbarButton = ({
-  onClick,
-  title,
-  children,
-  active = false,
-}: {
-  onClick: () => void;
-  title: string;
-  children: React.ReactNode;
-  active?: boolean;
-}) => (
-  <Button
-    type='button'
-    variant='icon'
-    size='icon'
-    title={title}
-    onClick={onClick}
-    className={`size-7 ${active ? 'bg-neutral-100' : ''}`}
-  >
-    {children}
-  </Button>
-);
+import InsertImageDialog from '@/components/shared/InsertImageDialog';
+import { $createImageNode } from '../ImageNode';
+import UndoIcon from '@/assets/icons/undo-icon.png';
+import RemoveFormat from '@/assets/icons/remove-format.png';
+import ToolbarButton from '../ToolbarButton';
 
 export function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
@@ -81,6 +60,7 @@ export function ToolbarPlugin() {
     top: number;
     left: number;
   } | null>(null);
+  const [openDialogInsertImage, setOpenDialogInsertImage] = useState(false);
 
   const toggleFullscreen = () => {
     const container = document.querySelector('.editor-container');
@@ -211,16 +191,35 @@ export function ToolbarPlugin() {
     editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
   };
 
-  const insertImage = () => {
-    const url = prompt('Enter image URL');
-    if (!url) return;
-
+  const handleInsertImage = (src: string, alt: string) => {
     editor.update(() => {
-      const img = document.createElement('img');
-      img.src = url;
-      const selection = window.getSelection();
-      if (selection?.rangeCount) {
-        selection.getRangeAt(0).insertNode(img);
+      const imageNode = $createImageNode({ src, altText: alt });
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        selection.insertNodes([imageNode]);
+      }
+    });
+  };
+
+  const removeFormatting = () => {
+    editor.update(() => {
+      const selection = $getSelection();
+      if (!$isRangeSelection(selection)) return;
+
+      $setBlocksType(selection, () => $createParagraphNode());
+
+      editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left');
+
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
+
+      if (selection.hasFormat('bold')) {
+        editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold');
+      }
+      if (selection.hasFormat('italic')) {
+        editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic');
+      }
+      if (selection.hasFormat('strikethrough')) {
+        editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough');
       }
     });
   };
@@ -359,14 +358,32 @@ export function ToolbarPlugin() {
         <ToolbarButton onClick={removeLink} title='Remove Link'>
           <Icon icon='tabler:unlink' className='size-[18px]' />
         </ToolbarButton>
-        <ToolbarButton onClick={insertImage} title='Insert Image'>
-          <ImageIcon size={18} />
+        <ToolbarButton
+          onClick={() => setOpenDialogInsertImage(true)}
+          title='Insert Image'
+        >
+          <Icon icon='ri:image-fill' className='size-[18px]' />
         </ToolbarButton>
       </div>
       <div className='h-4 w-[1px] bg-[#919EAB]/20'></div>
-
+      <div className='flex gap-1'>
+        <ToolbarButton
+          onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)}
+          title='Undo'
+        >
+          <img src={UndoIcon} alt='Undo' className='size-[13.5px]' />
+        </ToolbarButton>
+        <ToolbarButton onClick={removeFormatting} title='Remove Formatting'>
+          <img src={RemoveFormat} alt='Undo' className='size-[13.5px]' />
+        </ToolbarButton>
+      </div>
+      <div className='h-4 w-[1px] bg-[#919EAB]/20'></div>
       <ToolbarButton onClick={toggleFullscreen} title='Toggle Fullscreen'>
-        {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+        {isFullscreen ? (
+          <Icon icon='ri:fullscreen-exit-line' className='size-[18px]' />
+        ) : (
+          <Icon icon='ri:fullscreen-line' className='size-[18px]' />
+        )}
       </ToolbarButton>
 
       {showLinkPopover && (
@@ -378,6 +395,12 @@ export function ToolbarPlugin() {
           onClose={() => setShowLinkPopover(false)}
         />
       )}
+
+      <InsertImageDialog
+        open={openDialogInsertImage}
+        onOpenChange={setOpenDialogInsertImage}
+        onInsertImage={handleInsertImage}
+      />
     </div>
   );
 }

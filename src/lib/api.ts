@@ -19,14 +19,20 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+let isSessionExpiredHandled = false;
+let isTimeoutHandled = false;
+
+// ✅ Handling error 401 (expired token)
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (
       error.response &&
       error.response.status === 401 &&
-      !window.location.pathname.includes('/login')
+      !window.location.pathname.includes('/login') &&
+      !isSessionExpiredHandled
     ) {
+      isSessionExpiredHandled = true;
       console.warn('Unauthorized! Auto logging out...');
       localStorage.removeItem('authToken');
       localStorage.removeItem('userEmail');
@@ -38,6 +44,14 @@ apiClient.interceptors.response.use(
       setTimeout(() => {
         window.location.reload();
       }, 1500);
+    }
+
+    // ✅ Handling error timeout (ECONNABORTED)
+    if (error.code === 'ECONNABORTED' && !isTimeoutHandled) {
+      isTimeoutHandled = true;
+      toast.error(
+        'Request timed out. Please check your connection or try again.'
+      );
     }
 
     return Promise.reject(error);

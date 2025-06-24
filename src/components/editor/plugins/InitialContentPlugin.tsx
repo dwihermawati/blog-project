@@ -13,7 +13,9 @@ function InitialContentPlugin({ initialContent }: { initialContent?: string }) {
 
     try {
       const parsedState = editor.parseEditorState(initialContent);
-      editor.setEditorState(parsedState);
+      Promise.resolve().then(() => {
+        editor.setEditorState(parsedState);
+      });
     } catch (err) {
       editor.update(() => {
         const root = $getRoot();

@@ -1,3 +1,29 @@
+.editor-container {
+  position: relative;
+}
+.editor-container.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: white;
+  padding-inline: clamp(1rem, 3.85vw, 3rem);
+  padding-block: 2rem;
+  overflow: auto;
+}
+
+.editor-container.fullscreen [contenteditable] {
+  outline: none !important;
+  padding-inline: 0 !important;
+}
+.editor-container.fullscreen .placeholder {
+  left: 0;
+}
+
+.editor-container.fullscreen .toolbar {
+  padding-inline: 0;
+  padding-top: 0;
+}
+
 .editor-input {
   font-family: 'Inter', sans-serif;
   color: #181d27;
@@ -37,13 +63,13 @@
 .editor-input ul {
   list-style-type: disc;
   padding-left: 1.5rem;
-  margin-bottom: 1rem;
+  margin-block: 0.5rem;
 }
 
 .editor-input ol {
   list-style-type: decimal;
   padding-left: 1.5rem;
-  margin-bottom: 1rem;
+  margin-block: 0.5rem;
 }
 
 .editor-input li {
@@ -64,6 +90,6 @@
   font-style: italic;
 }
 
-.editor-input u {
-  text-decoration: underline;
+.editor-input .strikethrough {
+  text-decoration: line-through;
 }

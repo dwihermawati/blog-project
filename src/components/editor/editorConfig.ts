@@ -4,6 +4,7 @@ import { LinkNode } from '@lexical/link';
 import { ParagraphNode, TextNode } from 'lexical';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
+import { ImageNode } from './ImageNode';
 
 export const editorNodes: Klass<LexicalNode>[] = [
   LinkNode,
@@ -13,6 +14,7 @@ export const editorNodes: Klass<LexicalNode>[] = [
   ListNode,
   ListItemNode,
   QuoteNode,
+  ImageNode,
 ];
 
 export const editorConfig: InitialConfigType = {
