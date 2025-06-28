@@ -19,6 +19,10 @@ const changePasswordSchema = z
       .min(2, 'New password must be at least 2 characters.'),
     confirmPassword: z.string().min(1, 'Password confirmation is required.'),
   })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: 'New password must be different from current password.',
+    path: ['newPassword'],
+  })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: 'New password confirmation does not match.',
     path: ['confirmPassword'],

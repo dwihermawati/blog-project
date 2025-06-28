@@ -148,7 +148,7 @@ const CommentForm: React.FC<PostCommentsProps> = ({ postId, onOpenDialog }) => {
           Error loading comments: {commentsError?.message}
         </div>
       ) : commentsData && commentsData.length > 0 ? (
-        <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-3'>
           {[...commentsData]
             .reverse()
             .slice(0, 3)

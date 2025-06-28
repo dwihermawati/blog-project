@@ -109,7 +109,7 @@ const Navbar: React.FC<NavbarProps> = ({ variant = 'default' }) => {
           {variant === 'default' ? (
             <>
               <Link
-                to='/'
+                to='/?refresh=true'
                 className='cursor-pointer transition-transform hover:scale-110'
               >
                 <img

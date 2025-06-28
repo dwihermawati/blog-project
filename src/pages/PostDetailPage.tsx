@@ -18,6 +18,7 @@ import useBlogPosts from '@/hooks/useBlogPosts';
 import PostLikeButton from '@/components/blog/PostLikeButton';
 import useGetUserProfileById from '@/hooks/useGetUserProfileById';
 import imageDefaultError from '@/assets/images/defaultImageIfError.png';
+import useGetUserByEmail from '@/hooks/useGetUserByEmail';
 
 const PostDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -51,6 +52,8 @@ const PostDetailPage: React.FC = () => {
     id: post?.author?.id as number,
     enabled: !!post?.author?.id,
   });
+
+  const { data: currentUser } = useGetUserByEmail();
 
   const [imageError, setImageError] = useState(false);
 
@@ -146,26 +149,30 @@ const PostDetailPage: React.FC = () => {
               dangerouslySetInnerHTML={renderSafeHTML(post.content)}
             />
             <div className='h-[1px] w-full bg-neutral-300' />
-            <div className='flex flex-col gap-3'>
+            <div className='flex flex-col gap-3 md:gap-4'>
               <CommentForm
                 postId={post.id}
                 onOpenDialog={() => setCommentDialogOpen(true)}
               />
-              <div className='h-[1px] w-full bg-neutral-300' />
-              <h2 className='md:display-xs-bold text-xl-bold text-neutral-900'>
-                Another Post
-              </h2>
-              {otherPosts?.data?.filter((p) => p.id !== post.id)?.length ? (
-                otherPosts.data
-                  .filter((p) => p.id !== post.id)
-                  .slice(0, 1)
-                  .map((p) => <BlogCard key={p.id} post={p} />)
-              ) : (
-                <p className='text-sm-regular text-neutral-500'>
-                  No other posts to show.
-                </p>
-              )}
             </div>
+            <div className='h-[1px] w-full bg-neutral-300' />
+            <h2 className='md:display-xs-bold text-xl-bold text-neutral-900'>
+              Another Post
+            </h2>
+            {otherPosts?.data?.filter(
+              (p) => p.id !== post.id && p.author.id !== currentUser?.id
+            )?.length ? (
+              otherPosts.data
+                .filter(
+                  (p) => p.id !== post.id && p.author.id !== currentUser?.id
+                )
+                .slice(0, 1)
+                .map((p) => <BlogCard key={p.id} post={p} />)
+            ) : (
+              <p className='text-sm-regular text-neutral-500'>
+                No other posts to show.
+              </p>
+            )}
           </>
         )}
       </main>

@@ -14,12 +14,12 @@ import { Input } from '@/components/ui/input';
 import { BeatLoader } from 'react-spinners';
 import useCreatePost from '@/hooks/useCreatePost';
 import { CreatePostPayload } from '@/types/blog';
-import { Icon } from '@iconify/react';
 import { Label } from '@/components/ui/label';
 import { ImageUploadController } from '../shared/ImageUploadController';
 import { useAnimation, motion } from 'motion/react';
 import { toast } from 'react-toastify';
 import Editor from '../editor/LazyEditor';
+import { TagInputField } from '../shared/TagInputField';
 
 const createPostSchema = z.object({
   title: z
@@ -99,27 +99,6 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess }) => {
     createPost(payload);
   };
 
-  const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      const input = e.target as HTMLInputElement;
-      const newTag = input.value.trim().replace(/,$/, '');
-      if (newTag && !form.getValues('tags')?.includes(newTag)) {
-        form.setValue('tags', [...(form.getValues('tags') || []), newTag]);
-        form.clearErrors('tags');
-        input.value = '';
-      }
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    form.setValue(
-      'tags',
-      (form.getValues('tags') || []).filter((tag) => tag !== tagToRemove)
-    );
-    form.clearErrors('tags');
-  };
-
   const controls = useAnimation();
   const shakeAnimation = {
     x: [0, -10, 10, -10, 10, 0],
@@ -185,36 +164,12 @@ const CreatePostForm: React.FC<CreatePostFormProps> = ({ onSuccess }) => {
           control={form.control}
           name='tags'
           render={({ field, fieldState }) => (
-            <FormItem>
-              <Label>Tags</Label>
-              <FormControl>
-                <div>
-                  <Input
-                    placeholder='Enter your tags'
-                    onKeyDown={handleTagInput}
-                    disabled={isCreatingPost}
-                    aria-invalid={!!fieldState.error}
-                  />
-                  <div className='mt-1 flex flex-wrap gap-2'>
-                    {field.value &&
-                      field.value.map((tag, index) => (
-                        <span
-                          key={index}
-                          className='text-xs-regular flex items-center gap-2 rounded-md border border-neutral-300 bg-white p-2 text-neutral-900'
-                        >
-                          {tag}
-                          <Icon
-                            icon='lucide:x'
-                            className='size-3 cursor-pointer'
-                            onClick={() => removeTag(tag)}
-                          />
-                        </span>
-                      ))}
-                  </div>
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <TagInputField
+              value={field.value}
+              onChange={field.onChange}
+              error={fieldState.error}
+              disabled={isCreatingPost}
+            />
           )}
         />
 

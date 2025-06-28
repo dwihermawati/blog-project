@@ -2,12 +2,9 @@ import BlogList from '@/components/blog/BlogList';
 import { Footer } from '@/components/common/Footer';
 import Navbar from '@/components/common/Navbar';
 import { generateClamp } from '@/function/generate-clamp';
-import useGetUserByEmail from '@/hooks/useGetUserByEmail';
 import React from 'react';
 
 const HomePage: React.FC = () => {
-  useGetUserByEmail();
-
   return (
     <>
       <Navbar />

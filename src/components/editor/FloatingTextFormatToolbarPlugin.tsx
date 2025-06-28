@@ -35,25 +35,23 @@ export default function FloatingTextFormatToolbarPlugin() {
   } | null>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLElement | null>(null);
-
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
+    editorRef.current = document.querySelector('.editor-container');
+  }, []);
+
+  useEffect(() => {
     const container = document.querySelector('.editor-container');
-    if (container?.classList.contains('fullscreen')) {
-      setIsFullscreen(true);
-    } else {
-      setIsFullscreen(false);
-    }
+    setIsFullscreen(container?.classList.contains('fullscreen') ?? false);
   }, [position]);
 
   useEffect(() => {
-    editorRef.current = document.querySelector('.editor-container');
-
     const updateToolbar = () => {
+      if (showPopover) return;
+
       const selection = window.getSelection();
       const editorElem = editorRef.current;
-
       if (
         !selection ||
         selection.rangeCount === 0 ||
@@ -61,7 +59,6 @@ export default function FloatingTextFormatToolbarPlugin() {
         !editorElem
       ) {
         setPosition(null);
-        setShowPopover(false);
         return;
       }
 
@@ -71,13 +68,11 @@ export default function FloatingTextFormatToolbarPlugin() {
 
       if (rect.width === 0 && rect.height === 0) {
         setPosition(null);
-        setShowPopover(false);
         return;
       }
 
       const toolbarHeight = 40;
       const spacing = 8;
-
       const relativeTopAbove =
         rect.top - editorRect.top - toolbarHeight - spacing;
       const relativeTopBelow = rect.bottom - editorRect.top + spacing;
@@ -88,19 +83,13 @@ export default function FloatingTextFormatToolbarPlugin() {
         top: shouldShowAbove ? relativeTopAbove : relativeTopBelow,
         left: rect.left - editorRect.left + rect.width / 2,
       });
-
-      setLinkPosition({
-        top: rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX,
-      });
     };
 
     const remove = editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
-          updateToolbar(); // update posisi
-
+          updateToolbar();
           setIsBold(selection.hasFormat('bold'));
           setIsItalic(selection.hasFormat('italic'));
           setIsStrikethrough(selection.hasFormat('strikethrough'));
@@ -120,7 +109,6 @@ export default function FloatingTextFormatToolbarPlugin() {
           setIsLink(foundLink);
         } else {
           setPosition(null);
-          setShowPopover(false);
         }
       });
     });
@@ -143,7 +131,7 @@ export default function FloatingTextFormatToolbarPlugin() {
       document.removeEventListener('scroll', updateToolbar, true);
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [editor]);
+  }, [editor, showPopover]);
 
   const insertLink = () => {
     editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url: linkUrl });
@@ -151,71 +139,92 @@ export default function FloatingTextFormatToolbarPlugin() {
     setLinkUrl('');
   };
 
-  if (!position || !editorRef.current) return null;
+  const showLinkPopoverAtSelection = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const selectedText = selection.toString().trim();
+
+    if (!selectedText || range.collapsed) {
+      toast.info('You must select the text first');
+      return;
+    }
+
+    setLinkPosition({
+      top: rect.bottom + 8,
+      left: rect.left + rect.width / 2,
+    });
+
+    editor.getEditorState().read(() => {
+      const lexicalSelection = $getSelection();
+      if ($isRangeSelection(lexicalSelection)) {
+        const anchorNode = lexicalSelection.anchor.getNode();
+        const parent = anchorNode.getParent();
+        if (parent?.getType() === 'link' && 'getURL' in parent) {
+          setLinkUrl((parent as any).getURL());
+        } else {
+          setLinkUrl('');
+        }
+      }
+    });
+
+    setTimeout(() => setShowPopover(true), 0);
+    setPosition(null);
+  };
+
+  if (!editorRef.current) return null;
 
   return (
-    <div
-      ref={toolbarRef}
-      className={cn(
-        'z-40 flex items-center gap-1 rounded-md border border-neutral-300 bg-white p-1.5 shadow-md',
-        isFullscreen ? 'fixed' : 'absolute'
+    <>
+      {position && (
+        <div
+          ref={toolbarRef}
+          className={cn(
+            'z-40 flex items-center gap-1 rounded-md border border-neutral-300 bg-white p-1.5 shadow-md',
+            isFullscreen ? 'fixed' : 'absolute'
+          )}
+          style={{
+            top: position.top,
+            left: position.left,
+            transform: 'translateX(-50%) translateY(-7%)',
+          }}
+        >
+          <ToolbarButton
+            onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')}
+            title='Bold'
+            active={isBold}
+          >
+            <Bold size={15} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() =>
+              editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')
+            }
+            title='Italic'
+            active={isItalic}
+          >
+            <Italic size={15} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={() =>
+              editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
+            }
+            title='Strikethrough'
+            active={isStrikethrough}
+          >
+            <Strikethrough size={15} />
+          </ToolbarButton>
+          <ToolbarButton
+            onClick={showLinkPopoverAtSelection}
+            title='Insert Link'
+            active={isLink}
+          >
+            <Icon icon='ri:link' className='size-[15px]' />
+          </ToolbarButton>
+        </div>
       )}
-      style={{
-        top: position.top,
-        left: position.left,
-        transform: 'translateX(-50%) translateY(-7%)',
-      }}
-    >
-      <ToolbarButton
-        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')}
-        title='Bold'
-        active={isBold}
-      >
-        <Bold size={15} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')}
-        title='Italic'
-        active={isItalic}
-      >
-        <Italic size={15} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() =>
-          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
-        }
-        title='Strikethrough'
-        active={isStrikethrough}
-      >
-        <Strikethrough size={15} />
-      </ToolbarButton>
-      <ToolbarButton
-        onClick={() => {
-          const selection = window.getSelection();
-          if (!selection || selection.rangeCount === 0) return;
-
-          const range = selection.getRangeAt(0);
-          const rect = range.getBoundingClientRect();
-          const selectedText = selection.toString().trim();
-
-          if (!selectedText || range.collapsed) {
-            toast.info('You must select the text first');
-            return;
-          }
-
-          setLinkPosition({
-            top: rect.bottom + window.scrollY + 8,
-            left: rect.left + window.scrollX,
-          });
-
-          setShowPopover(true);
-          setPosition(null);
-        }}
-        title='Insert Link'
-        active={isLink}
-      >
-        <Icon icon='ri:link' className='size-[15px]' />
-      </ToolbarButton>
 
       {showPopover && linkPosition && (
         <LinkPopover
@@ -226,6 +235,6 @@ export default function FloatingTextFormatToolbarPlugin() {
           onClose={() => setShowPopover(false)}
         />
       )}
-    </div>
+    </>
   );
 }

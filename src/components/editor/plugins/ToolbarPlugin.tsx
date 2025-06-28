@@ -162,11 +162,11 @@ export function ToolbarPlugin() {
   };
 
   const openLinkPopover = () => {
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
+    const domSelection = window.getSelection();
+    if (!domSelection || domSelection.rangeCount === 0) return;
 
-    const range = selection.getRangeAt(0);
-    const selectedText = selection.toString().trim();
+    const range = domSelection.getRangeAt(0);
+    const selectedText = domSelection.toString().trim();
 
     if (!selectedText || range.collapsed) {
       toast.info('You must select the text first');
@@ -175,8 +175,22 @@ export function ToolbarPlugin() {
 
     const rect = range.getBoundingClientRect();
     setLinkPosition({
-      top: rect.bottom + window.scrollY + 8,
-      left: rect.left + window.scrollX,
+      top: rect.bottom + 8,
+      left: rect.left,
+    });
+
+    editor.getEditorState().read(() => {
+      const selection = $getSelection();
+      if ($isRangeSelection(selection)) {
+        const node = selection.anchor.getNode();
+        const parent = node.getParent();
+
+        if (parent?.getType() === 'link' && 'getURL' in parent) {
+          setLinkUrl((parent as any).getURL());
+        } else {
+          setLinkUrl('');
+        }
+      }
     });
 
     setShowLinkPopover(true);

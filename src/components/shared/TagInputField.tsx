@@ -39,9 +39,12 @@ export const TagInputField: React.FC<TagInputFieldProps> = ({
 
   return (
     <FormItem>
-      <Label>{label}</Label>
+      <Label className='mt-2 leading-3'>{label}</Label>
       <FormControl>
         <div>
+          <span className='text-xs-regular text-neutral-500'>
+            Add tags and press Enter after each one (e.g. design, web, react)
+          </span>
           <Input
             placeholder='Enter your tags'
             onKeyDown={handleAddTag}

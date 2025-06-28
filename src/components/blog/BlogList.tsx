@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useBlogPosts from '@/hooks/useBlogPosts';
 import BlogCard from './BlogCard';
 import PaginationControls from '@/components/shared/PaginationControls';
 import EmptyState from '../shared/EmptyState';
 import { useAuth } from '@/contexts/AuthContext';
 import { BeatLoader } from 'react-spinners';
+import { useLocation } from 'react-router-dom';
 
 interface BlogListEmptyStateProps {
   title: string;
@@ -48,6 +49,25 @@ const BlogList: React.FC<BlogListProps> = ({
 }) => {
   const { token } = useAuth();
   const [currentPage, setCurrentPage] = useState(initialPage);
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const refresh = params.get('refresh');
+
+    if (location.pathname === '/' && refresh === 'true') {
+      setCurrentPage(1);
+
+      const newParams = new URLSearchParams(location.search);
+      newParams.delete('refresh');
+
+      window.history.replaceState(
+        null,
+        '',
+        `${location.pathname}${newParams.toString() ? '?' + newParams.toString() : ''}`
+      );
+    }
+  }, [location]);
 
   const queryParams = {
     page: currentPage,

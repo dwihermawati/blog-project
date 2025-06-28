@@ -94,11 +94,8 @@ export function ImageUploadController({
                   ) : (
                     <div className='mx-auto max-w-50'>
                       <ImagePlus
-                        // {...getRootProps({
                         className='hover:text-primary-200 size-full cursor-pointer object-cover text-neutral-500'
                         onClick={open}
-
-                        // })}
                       />
                       <p className='text-sm-regular text-center leading-5 text-neutral-500'>
                         Image not found, please add or change image!!
@@ -159,7 +156,7 @@ export function ImageUploadController({
               )}
             </div>
           </FormControl>
-          <FormMessage />
+          <FormMessage>{fieldState.error?.message}</FormMessage>
         </FormItem>
       )}
     />
